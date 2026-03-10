@@ -1,0 +1,300 @@
+/* ============================================================
+   MACRO LAB — Global Styles
+   Shared across index.html and all recipe pages
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0a0b0c;
+  --surface: #131415;
+  --surface2: #1a1b1d;
+  --surface3: #212224;
+  --border: #252729;
+  --border2: #2e3032;
+  --protein: #4ade80;
+  --carbs: #facc15;
+  --fat: #f97316;
+  --fiber: #38bdf8;
+  --accent: #e8ff47;
+  --accent2: #c8df27;
+  --text: #f0f0ee;
+  --muted: #6b6e73;
+  --muted2: #4a4d52;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NOISE OVERLAY */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999;
+}
+
+/* FADE IN ANIMATION */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.5s ease both; }
+
+/* ============================================================
+   SHARED NAV
+   ============================================================ */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 40px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: rgba(10,11,12,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 3px;
+  color: var(--accent);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--muted); }
+
+.btn-add {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-add:hover { background: var(--accent2); transform: translateY(-1px); }
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: color 0.15s;
+  padding: 0;
+  text-decoration: none;
+}
+.back-btn:hover { color: var(--text); }
+.back-btn:hover .back-arrow { transform: translateX(-3px); }
+.back-arrow { font-size: 16px; transition: transform 0.15s; display: inline-block; }
+
+/* ============================================================
+   RECIPE PAGE — Macro Dashboard Styles
+   Used by every recipe page
+   ============================================================ */
+.recipe-page-wrap { max-width: 900px; margin: 0 auto; padding: 40px 40px 80px; }
+
+.recipe-header { margin-bottom: 36px; }
+.recipe-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #000;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  padding: 5px 12px;
+  border-radius: 3px;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.recipe-page-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 7vw, 80px);
+  line-height: 0.9;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+.recipe-page-title span { color: var(--accent); }
+.recipe-page-sub { color: var(--muted); font-size: 14px; font-weight: 300; }
+
+/* SERVING TOGGLE */
+.serving-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.serving-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+.serving-note  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.serving-controls { display: flex; align-items: center; gap: 12px; }
+.serving-btn {
+  width: 34px; height: 34px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.serving-btn:hover { border-color: var(--accent); color: var(--accent); }
+.serving-count-display {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  min-width: 44px;
+  text-align: center;
+  color: var(--accent);
+}
+.serving-unit { color: var(--muted); font-size: 13px; }
+
+/* MACRO HERO GRID */
+.macro-hero { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+
+.cal-card {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.cal-card::before {
+  content: '';
+  position: absolute; right: -20px; top: -20px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(232,255,71,0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.cal-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 68px;
+  line-height: 1;
+  color: var(--accent);
+}
+.cal-label { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+.cal-sub    { font-size: 12px; color: var(--muted2); margin-top: 4px; }
+
+.ring-wrap  { display: flex; align-items: center; gap: 20px; }
+.ring-svg   { width: 88px; height: 88px; }
+.ring-legend { display: flex; flex-direction: column; gap: 7px; }
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.legend-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* MACRO CARDS */
+.macro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.macro-card .accent-line {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; border-radius: 12px 12px 0 0;
+}
+.macro-card .m-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.macro-card .m-val   { font-family: 'Bebas Neue', sans-serif; font-size: 40px; line-height: 1; margin-bottom: 3px; }
+.macro-card .m-unit  { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 300; }
+.macro-card .m-cal   { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.macro-card .m-pct-bar  { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.macro-card .m-pct-fill { height: 100%; border-radius: 4px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+.macro-card .m-pct-label { font-size: 10px; color: var(--muted); margin-top: 5px; font-family: 'DM Mono', monospace; }
+
+/* SECONDARY STAT CARDS */
+.secondary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 14px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px; text-align: center;
+}
+.stat-card .s-val  { font-family: 'Bebas Neue', sans-serif; font-size: 26px; line-height: 1; }
+.stat-card .s-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.7px; }
+
+/* INGREDIENT TABLE */
+.r-section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px; letter-spacing: 1px;
+  margin: 32px 0 14px; color: var(--text);
+  display: flex; align-items: center; gap: 12px;
+}
+.r-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.ing-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+.ing-table th {
+  font-size: 9px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 1.2px; padding: 0 12px 6px; text-align: right; font-weight: 500;
+}
+.ing-table th:first-child { text-align: left; }
+.ing-table td {
+  background: var(--surface); padding: 12px;
+  text-align: right; font-family: 'DM Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+}
+.ing-table td:first-child {
+  text-align: left; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--text); font-weight: 500;
+  border-left: 1px solid var(--border); border-radius: 8px 0 0 8px;
+}
+.ing-table td:last-child { border-right: 1px solid var(--border); border-radius: 0 8px 8px 0; }
+.ing-sub { font-size: 10px; color: var(--muted); font-weight: 300; font-family: 'DM Mono', monospace; display: block; margin-top: 2px; }
+.totals-row td { background: var(--surface2); color: var(--text); border-color: var(--accent); font-size: 12px; }
+.totals-row td:first-child {
+  font-family: 'Bebas Neue', sans-serif; font-size: 15px;
+  letter-spacing: 1px; color: var(--accent); border-left: 3px solid var(--accent);
+}
+
+/* TIP BOX */
+.tip-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); border-radius: 10px;
+  padding: 18px 20px; margin-top: 28px;
+  font-size: 13px; line-height: 1.7; color: var(--muted);
+}
+.tip-box strong { color: var(--text); }
+.tip-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--accent); margin-bottom: 8px; letter-spacing: 1px; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 640px) {
+  .nav, .recipe-nav { padding: 16px 20px; }
+  .macro-hero { grid-template-columns: 1fr; }
+  .secondary-grid { grid-template-columns: repeat(2,1fr); }
+  .recipe-page-wrap { padding: 24px 20px 60px; }
+  .cal-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
