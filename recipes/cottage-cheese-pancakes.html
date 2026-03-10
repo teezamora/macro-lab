@@ -46,7 +46,7 @@
     <div class="serving-bar">
       <div>
         <div class="serving-label">Adjust Serving Size</div>
-        <div class="serving-note">Recipe makes ~8 pancakes</div>
+        <div class="serving-note">Recipe makes ~17 pancakes · 45g each</div>
       </div>
       <div class="serving-controls">
         <button class="serving-btn serving-btn-minus">−</button>
@@ -61,8 +61,8 @@
       <div class="cal-card">
         <div>
           <div class="cal-label">Total Calories</div>
-          <div class="cal-num" id="cal-display">207</div>
-          <div class="cal-sub" id="cal-sub">per 1 serving · 1,658 kcal full recipe</div>
+          <div class="cal-num" id="cal-display">100</div>
+          <div class="cal-sub" id="cal-sub">per 1 serving (45g) · 1,705 kcal full recipe</div>
         </div>
         <div class="ring-wrap">
           <svg class="ring-svg" viewBox="0 0 90 90">
@@ -72,9 +72,9 @@
             <circle id="ring-prot" cx="45" cy="45" r="38" fill="none" stroke="#4ade80" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
           </svg>
           <div class="ring-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div><span style="color:#4ade80;font-weight:600">21.6%</span>&nbsp;Protein</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div><span style="color:#facc15;font-weight:600">36.6%</span>&nbsp;Carbs</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span style="color:#f97316;font-weight:600">41.8%</span>&nbsp;Fat</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div><span style="color:#4ade80;font-weight:600">22.6%</span>&nbsp;Protein</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div><span style="color:#facc15;font-weight:600">35.8%</span>&nbsp;Carbs</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span style="color:#f97316;font-weight:600">41.6%</span>&nbsp;Fat</div>
           </div>
         </div>
       </div>
@@ -83,39 +83,39 @@
       <div class="macro-card">
         <div class="accent-line" style="background:var(--protein)"></div>
         <div class="m-label">Protein</div>
-        <div class="m-val" style="color:var(--protein)"><span id="m-protein">11.1</span><span class="m-unit">g</span></div>
-        <div class="m-cal" id="m-protein-cal">~44 kcal</div>
-        <div class="m-pct-bar"><div class="m-pct-fill" style="background:var(--protein);width:21.6%"></div></div>
-        <div class="m-pct-label">21.6% of calories</div>
+        <div class="m-val" style="color:var(--protein)"><span id="m-protein">5.6</span><span class="m-unit">g</span></div>
+        <div class="m-cal" id="m-protein-cal">~22 kcal</div>
+        <div class="m-pct-bar"><div class="m-pct-fill" style="background:var(--protein);width:22.6%"></div></div>
+        <div class="m-pct-label">22.6% of calories</div>
       </div>
 
       <!-- CARBS -->
       <div class="macro-card">
         <div class="accent-line" style="background:var(--carbs)"></div>
         <div class="m-label">Carbohydrates</div>
-        <div class="m-val" style="color:var(--carbs)"><span id="m-carbs">18.8</span><span class="m-unit">g</span></div>
-        <div class="m-cal" id="m-carbs-cal">~75 kcal</div>
-        <div class="m-pct-bar"><div class="m-pct-fill" style="background:var(--carbs);width:36.6%"></div></div>
-        <div class="m-pct-label">36.6% of calories</div>
+        <div class="m-val" style="color:var(--carbs)"><span id="m-carbs">8.9</span><span class="m-unit">g</span></div>
+        <div class="m-cal" id="m-carbs-cal">~36 kcal</div>
+        <div class="m-pct-bar"><div class="m-pct-fill" style="background:var(--carbs);width:35.8%"></div></div>
+        <div class="m-pct-label">35.8% of calories</div>
       </div>
 
       <!-- FAT -->
       <div class="macro-card">
         <div class="accent-line" style="background:var(--fat)"></div>
         <div class="m-label">Total Fat</div>
-        <div class="m-val" style="color:var(--fat)"><span id="m-fat">9.5</span><span class="m-unit">g</span></div>
-        <div class="m-cal" id="m-fat-cal">~86 kcal</div>
-        <div class="m-pct-bar"><div class="m-pct-fill" style="background:var(--fat);width:41.8%"></div></div>
-        <div class="m-pct-label">41.8% of calories</div>
+        <div class="m-val" style="color:var(--fat)"><span id="m-fat">4.6</span><span class="m-unit">g</span></div>
+        <div class="m-cal" id="m-fat-cal">~41 kcal</div>
+        <div class="m-pct-bar"><div class="m-pct-fill" style="background:var(--fat);width:41.6%"></div></div>
+        <div class="m-pct-label">41.6% of calories</div>
       </div>
     </div>
 
     <!-- SECONDARY STATS -->
     <div class="secondary-grid">
-      <div class="stat-card"><div class="s-val" id="s-fiber" style="color:var(--fiber)">0.4<span style="font-size:13px">g</span></div><div class="s-label">🌿 Fiber</div></div>
-      <div class="stat-card"><div class="s-val" id="s-sugar" style="color:#f472b6">6.1<span style="font-size:13px">g</span></div><div class="s-label">🍯 Sugar</div></div>
-      <div class="stat-card"><div class="s-val" id="s-sodium" style="color:#a78bfa">443<span style="font-size:13px">mg</span></div><div class="s-label">🧂 Sodium</div></div>
-      <div class="stat-card"><div class="s-val" id="s-chol" style="color:#fb7185">115<span style="font-size:13px">mg</span></div><div class="s-label">💊 Cholesterol</div></div>
+      <div class="stat-card"><div class="s-val" id="s-fiber" style="color:var(--fiber)">0.2<span style="font-size:13px">g</span></div><div class="s-label">🌿 Fiber</div></div>
+      <div class="stat-card"><div class="s-val" id="s-sugar" style="color:#f472b6">2.8<span style="font-size:13px">g</span></div><div class="s-label">🍯 Sugar</div></div>
+      <div class="stat-card"><div class="s-val" id="s-sodium" style="color:#a78bfa">222<span style="font-size:13px">mg</span></div><div class="s-label">🧂 Sodium</div></div>
+      <div class="stat-card"><div class="s-val" id="s-chol" style="color:#fb7185">54<span style="font-size:13px">mg</span></div><div class="s-label">💊 Cholesterol</div></div>
     </div>
 
     <!-- INGREDIENT TABLE -->
@@ -133,24 +133,91 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>Cottage Cheese<span class="ing-sub">16 oz / 454g</span></td><td>363</td><td>49.9g</td><td>14.5g</td><td>10.0g</td><td>12.5g</td><td>1361mg</td></tr>
-        <tr><td>Eggs<span class="ing-sub">4 large eggs</span></td><td>286</td><td>25.2g</td><td>1.4g</td><td>19.0g</td><td>1.4g</td><td>284mg</td></tr>
-        <tr><td>Butter<span class="ing-sub">1/4 cup / 57g</span></td><td>407</td><td>0.5g</td><td>0.0g</td><td>46.0g</td><td>0g</td><td>325mg</td></tr>
+        <tr><td>Cottage Cheese (2% milkfat)<span class="ing-sub">16 oz / 454g · USDA #1100736</span></td><td>409</td><td>56.3g</td><td>15.3g</td><td>11.3g</td><td>12.1g</td><td>1,689mg</td></tr>
+        <tr><td>Eggs<span class="ing-sub">4 large eggs / ~200g</span></td><td>286</td><td>25.2g</td><td>1.4g</td><td>19.0g</td><td>0.7g</td><td>284mg</td></tr>
+        <tr><td>Butter<span class="ing-sub">1/4 cup / 57g</span></td><td>409</td><td>0.5g</td><td>0.0g</td><td>46.2g</td><td>0g</td><td>325mg</td></tr>
         <tr><td>Honey<span class="ing-sub">2 tbsp / 42g</span></td><td>128</td><td>0.1g</td><td>34.6g</td><td>0.0g</td><td>34.2g</td><td>1mg</td></tr>
         <tr><td>Vanilla Extract<span class="ing-sub">1 tsp / 4.2g</span></td><td>12</td><td>0.0g</td><td>0.5g</td><td>0.0g</td><td>0.5g</td><td>0mg</td></tr>
         <tr><td>All Purpose Flour<span class="ing-sub">1 cup / 125g</span></td><td>455</td><td>12.9g</td><td>95.4g</td><td>1.2g</td><td>0.3g</td><td>3mg</td></tr>
-        <tr><td>Baking Powder<span class="ing-sub">1 tbsp / 12g</span></td><td>7</td><td>0.0g</td><td>3.8g</td><td>0.0g</td><td>0g</td><td>1567mg</td></tr>
-        <tr class="totals-row"><td>FULL RECIPE TOTAL<span class="ing-sub">~8 servings</span></td><td>1,658</td><td>88.6g</td><td>150.2g</td><td>76.2g</td><td>48.9g</td><td>3,541mg</td></tr>
+        <tr><td>Baking Powder<span class="ing-sub">1 tbsp / 12g</span></td><td>6</td><td>0.0g</td><td>3.3g</td><td>0.0g</td><td>0g</td><td>1,464mg</td></tr>
+        <tr class="totals-row"><td>FULL RECIPE TOTAL<span class="ing-sub">~17 servings · 45g each</span></td><td>1,705</td><td>95.0g</td><td>150.5g</td><td>77.7g</td><td>47.8g</td><td>3,766mg</td></tr>
       </tbody>
     </table>
+
+    <!-- NUTRITION FACTS LABEL -->
+    <div class="nf-section">
+      <div class="r-section-title">Nutrition Facts Label</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">Scan with your nutrition tracking app camera to log this recipe.</p>
+      <div class="nf-label">
+        <div class="nf-title">Nutrition Facts</div>
+        <div class="nf-servings-block">
+          <div>
+            <div>About 17 servings per recipe</div>
+            <div class="nf-serving-size">Serving size &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 1 pancake (45g)</div>
+          </div>
+        </div>
+        <div class="nf-cal-row">
+          <div class="nf-cal-label">Calories</div>
+          <div class="nf-cal-num">100</div>
+        </div>
+        <div class="nf-dv-note">% Daily Value*</div>
+
+        <div class="nf-row">
+          <div class="nf-row-left"><span class="nf-bold">Total Fat</span> 4.6g</div>
+          <div class="nf-pct">6%</div>
+        </div>
+        <div class="nf-row nf-sub">
+          <div class="nf-row-left">Saturated Fat 2.3g</div>
+          <div class="nf-pct">11%</div>
+        </div>
+        <div class="nf-row nf-sub">
+          <div class="nf-row-left"><em>Trans</em> Fat 0g</div>
+          <div></div>
+        </div>
+        <div class="nf-row">
+          <div class="nf-row-left"><span class="nf-bold">Cholesterol</span> 54mg</div>
+          <div class="nf-pct">18%</div>
+        </div>
+        <div class="nf-row">
+          <div class="nf-row-left"><span class="nf-bold">Sodium</span> 222mg</div>
+          <div class="nf-pct">10%</div>
+        </div>
+        <div class="nf-row">
+          <div class="nf-row-left"><span class="nf-bold">Total Carbohydrate</span> 8.9g</div>
+          <div class="nf-pct">3%</div>
+        </div>
+        <div class="nf-row nf-sub">
+          <div class="nf-row-left">Dietary Fiber 0.2g</div>
+          <div class="nf-pct">1%</div>
+        </div>
+        <div class="nf-row nf-sub">
+          <div class="nf-row-left">Total Sugars 2.8g</div>
+          <div></div>
+        </div>
+        <div class="nf-row nf-sub2">
+          <div class="nf-row-left">Includes 2g Added Sugars</div>
+          <div class="nf-pct">4%</div>
+        </div>
+        <div class="nf-row nf-thick-top">
+          <div class="nf-row-left"><span class="nf-bold">Protein</span> 5.6g</div>
+          <div></div>
+        </div>
+        <div class="nf-footer">
+          * The % Daily Value (DV) tells you how much a nutrient in a serving
+          of food contributes to a daily diet. 2,000 calories a day is used
+          for general nutrition advice.
+        </div>
+      </div>
+    </div>
 
     <!-- BODYBUILDER NOTES -->
     <div class="tip-box">
       <div class="tip-title">⚡ Bodybuilder Notes</div>
-      <strong>High-protein win:</strong> Cottage cheese + eggs deliver ~88g protein for the whole batch (~11g/pancake) — a solid post-workout carb+protein combo.<br><br>
-      <strong>Fat is elevated</strong> mostly from butter (46g). Swap butter for Greek yogurt or reduce to 2 tbsp to cut ~200 kcal and push the macro ratio more protein-forward.<br><br>
-      <strong>Sodium alert:</strong> Baking powder accounts for 1,567mg of the 3,541mg total sodium. If you're cutting or watching sodium, halve the baking powder.<br><br>
-      <strong>Timing tip:</strong> With ~19g carbs/pancake, this works best as a <strong>pre- or post-workout meal</strong>. Pair 2–3 pancakes with a protein shake for a complete anabolic window hit.
+      <strong>Lighter than it looks:</strong> At 45g each, these are smaller pancakes — 100 kcal and 5.6g protein per pancake. Eat 3–4 for a solid 300–400 kcal meal with ~17–22g protein.<br><br>
+      <strong>Cottage cheese is the protein anchor:</strong> The whole batch delivers ~95g protein, mostly from cottage cheese (56g) and eggs (25g). Use 2% milkfat for the USDA values shown here.<br><br>
+      <strong>Fat comes from butter + eggs:</strong> Butter contributes ~46g fat to the batch. Swap for 2 tbsp Greek yogurt to cut roughly 25g fat and ~225 kcal across the whole batch.<br><br>
+      <strong>Sodium note:</strong> Baking powder accounts for ~1,464mg of the 3,766mg total. Halving the baking powder cuts sodium significantly with minimal impact on texture.<br><br>
+      <strong>Timing tip:</strong> With only ~9g carbs per pancake, stack 3–4 post-workout and pair with a protein shake to hit your anabolic window properly.
     </div>
 
   </div><!-- end .recipe-page-wrap -->
@@ -159,16 +226,16 @@
   <script>
     // ── RECIPE DATA ──────────────────────────────────────────
     const FULL = {
-      cal: 1658, protein: 88.6, carbs: 150.2, fat: 76.2,
-      fiber: 3.5, sugar: 48.9, sodium: 3541, chol: 920
+      cal: 1705, protein: 95.0, carbs: 150.5, fat: 77.7,
+      fiber: 3.5, sugar: 47.8, sodium: 3766, chol: 925
     };
-    const SERVINGS_TOTAL = 8;
+    const SERVINGS_TOTAL = 17;
 
     // ── DONUT RING ───────────────────────────────────────────
     renderDonutRing([
-      { id: 'ring-fat',  pct: 0.418, color: '#f97316' },
-      { id: 'ring-carb', pct: 0.366, color: '#facc15' },
-      { id: 'ring-prot', pct: 0.216, color: '#4ade80' },
+      { id: 'ring-fat',  pct: 0.416, color: '#f97316' },
+      { id: 'ring-carb', pct: 0.358, color: '#facc15' },
+      { id: 'ring-prot', pct: 0.226, color: '#4ade80' },
     ]);
 
     // ── SERVING SCALER ───────────────────────────────────────
@@ -176,7 +243,7 @@
       const s = serving, f = total;
       const fmt = v => v.toFixed(1);
       document.getElementById('cal-display').textContent    = Math.round(data.cal * s / f);
-      document.getElementById('cal-sub').textContent        = `per ${s} serving(s) · 1,658 kcal full recipe`;
+      document.getElementById('cal-sub').textContent        = `per ${s} serving(s) (${s * 45}g) · 1,705 kcal full recipe`;
       document.getElementById('m-protein').textContent      = fmt(data.protein * s / f);
       document.getElementById('m-carbs').textContent        = fmt(data.carbs   * s / f);
       document.getElementById('m-fat').textContent          = fmt(data.fat     * s / f);
