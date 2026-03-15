@@ -51,6 +51,27 @@ const RECIPES = [
     },
   },
 
+  {
+    file:        "honey-garlic-chicken.html",
+    name:        "Honey Garlic Chicken",
+    description: "Instant Pot chicken & tofu · honey soy glaze · 9 ingredients",
+    emoji:       "🍗",
+    thumbBg:     "linear-gradient(135deg, #1a0f00 0%, #2d1a00 50%, #1a0f00 100%)",
+    tags:        ["Dinner", "High Protein", "Meal Prep"],
+    servings:    5,
+    perServing: {
+      calories: 424,
+      protein:  40.3,
+      carbs:    37.0,
+      fat:      13.1,
+    },
+    macroSplit: {
+      protein: 37.7,
+      carbs:   34.6,
+      fat:     27.7,
+    },
+  },
+
   // ── PASTE NEW RECIPES BELOW THIS LINE ─────────────────────
   // {
   //   file:        "chicken-rice-bowl.html",
