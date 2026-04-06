@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Goals — LATTITUDE</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <style>
+    .profile-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(10,11,12,0.92); backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .profile-body {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 36px 40px 80px;
+      align-items: start;
+    }
+
+    /* ── PANEL ──────────────────────────────────────────── */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px; margin-bottom: 16px;
+    }
+    .panel-title {
+      font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+      letter-spacing: 1px; margin-bottom: 18px; color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── UNIT TOGGLE ────────────────────────────────────── */
+    .unit-toggle {
+      display: inline-flex; border: 1px solid var(--border);
+      border-radius: 8px; overflow: hidden; margin-bottom: 20px;
+    }
+    .unit-btn {
+      padding: 8px 20px; font-family: 'DM Mono', monospace;
+      font-size: 11px; font-weight: 500; letter-spacing: 1.5px;
+      text-transform: uppercase; border: none; cursor: pointer;
+      background: var(--surface2); color: var(--muted);
+      transition: all 0.15s;
+    }
+    .unit-btn.active { background: var(--accent); color: #000; }
+    .unit-btn:not(.active):hover { color: var(--text); }
+
+    /* ── FORM FIELDS ────────────────────────────────────── */
+    .field-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .field-full  { margin-bottom: 12px; }
+
+    label {
+      display: block; font-size: 10px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 5px; font-family: 'DM Mono', monospace;
+    }
+    input[type="number"] {
+      width: 100%; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 7px;
+      color: var(--text); font-family: 'DM Sans', sans-serif;
+      font-size: 14px; padding: 10px 12px; outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="number"]:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--muted2); }
+
+    /* ── OPTION CARDS (activity / phase) ────────────────── */
+    .option-grid { display: flex; flex-direction: column; gap: 6px; }
+    .option-card {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 14px; border: 1px solid var(--border);
+      border-radius: 9px; background: var(--surface2);
+      cursor: pointer; transition: all 0.15s; position: relative;
+    }
+    .option-card:hover { border-color: var(--border2); }
+    .option-card.selected { border-color: var(--accent); background: rgba(232,255,71,0.04); }
+    .option-card input[type="radio"] { display: none; }
+    .option-radio {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid var(--border2); flex-shrink: 0;
+      margin-top: 2px; transition: all 0.15s; position: relative;
+    }
+    .option-card.selected .option-radio {
+      border-color: var(--accent); background: var(--accent);
+    }
+    .option-card.selected .option-radio::after {
+      content: ''; position: absolute; inset: 3px;
+      background: #000; border-radius: 50%;
+    }
+    .option-label { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.2; }
+    .option-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 300; }
+
+    .phase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .phase-card {
+      padding: 14px; border: 1px solid var(--border);
+      border-radius: 9px; background: var(--surface2);
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .phase-card:hover { border-color: var(--border2); }
+    .phase-card.selected { border-color: var(--accent); background: rgba(232,255,71,0.04); }
+    .phase-card input[type="radio"] { display: none; }
+    .phase-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; margin-bottom: 3px; }
+    .phase-desc { font-size: 10px; color: var(--muted); font-weight: 300; }
+
+    /* ── SAVE BUTTON ────────────────────────────────────── */
+    .btn-save {
+      width: 100%; background: var(--accent); color: #000;
+      border: none; font-family: 'DM Mono', monospace;
+      font-size: 12px; font-weight: 500; letter-spacing: 2px;
+      padding: 14px 20px; border-radius: 9px; cursor: pointer;
+      text-transform: uppercase; transition: all 0.15s;
+      margin-top: 4px;
+    }
+    .btn-save:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── SIDEBAR RESULTS ────────────────────────────────── */
+    .sidebar { position: sticky; top: 88px; }
+
+    .empty-results {
+      text-align: center; padding: 40px 20px;
+      color: var(--muted2); font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      line-height: 1.8;
+    }
+    .empty-results .e-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.3; }
+
+    .result-cal {
+      font-family: 'Bebas Neue', sans-serif; font-size: 64px;
+      line-height: 1; color: var(--accent); margin-bottom: 2px;
+    }
+    .result-cal-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
+
+    .calc-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .calc-row:last-child { border-bottom: none; }
+    .calc-row-label { color: var(--muted); font-weight: 400; }
+    .calc-row-val   { font-family: 'DM Mono', monospace; color: var(--text); }
+
+    .macro-result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+    .macro-result-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 10px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .macro-result-card .accent-line {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: 10px 10px 0 0;
+    }
+    .macro-result-card .mr-val {
+      font-family: 'Bebas Neue', sans-serif; font-size: 28px;
+      line-height: 1; margin-bottom: 2px;
+    }
+    .macro-result-card .mr-unit { font-size: 12px; font-weight: 300; }
+    .macro-result-card .mr-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 3px; }
+    .macro-result-card .mr-cal { font-size: 9px; color: var(--muted2); font-family: 'DM Mono', monospace; margin-top: 3px; }
+
+    .phase-badge-display {
+      display: inline-block; font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 3px;
+      background: rgba(232,255,71,0.1); color: var(--accent);
+      border: 1px solid rgba(232,255,71,0.2); margin-bottom: 16px;
+    }
+
+    .formula-note {
+      font-size: 10px; color: var(--muted2); font-family: 'DM Mono', monospace;
+      line-height: 1.7; margin-top: 14px; padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── SAVED TOAST ────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+      background: var(--accent); color: #000;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 12px 24px; border-radius: 8px;
+      transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+      z-index: 999; white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .profile-body { grid-template-columns: 1fr; padding: 24px 20px 60px; }
+      .sidebar { position: static; }
+      .profile-nav { padding: 16px 20px; }
+      .phase-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="profile-nav">
+    <a href="index.html" class="back-btn"><span class="back-arrow">←</span> Dashboard</a>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div id="auth-nav"></div>
+      <a href="index.html" class="nav-logo" style="font-size:18px">LATT<span>ITUDE</span></a>
+    </div>
+  </nav>
+
+  <div class="profile-body">
+
+    <!-- ════════════════ LEFT COLUMN ════════════════ -->
+    <div>
+
+      <!-- UNIT TOGGLE -->
+      <div style="margin-bottom:4px">
+        <div class="unit-toggle">
+          <button class="unit-btn active" data-unit="imperial">Imperial (lbs / ft)</button>
+          <button class="unit-btn" data-unit="metric">Metric (kg / cm)</button>
+        </div>
+      </div>
+
+      <!-- BODY STATS -->
+      <div class="panel">
+        <div class="panel-title">Body Stats</div>
+
+        <!-- Imperial fields -->
+        <div id="imperial-fields">
+          <div class="field-row">
+            <div>
+              <label for="weight-lbs">Weight (lbs)</label>
+              <input type="number" id="weight-lbs" placeholder="185" min="80" max="400" step="0.5">
+            </div>
+            <div>
+              <label for="age">Age</label>
+              <input type="number" id="age" placeholder="25" min="16" max="80">
+            </div>
+          </div>
+          <div class="field-row">
+            <div>
+              <label for="height-ft">Height — Feet</label>
+              <input type="number" id="height-ft" placeholder="5" min="4" max="7">
+            </div>
+            <div>
+              <label for="height-in">Height — Inches</label>
+              <input type="number" id="height-in" placeholder="11" min="0" max="11" step="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric fields -->
+        <div id="metric-fields" style="display:none">
+          <div class="field-row-3">
+            <div>
+              <label for="weight-kg">Weight (kg)</label>
+              <input type="number" id="weight-kg" placeholder="84" min="40" max="180" step="0.5">
+            </div>
+            <div>
+              <label for="height-cm">Height (cm)</label>
+              <input type="number" id="height-cm" placeholder="180" min="140" max="220">
+            </div>
+            <div>
+              <label for="age-m">Age</label>
+              <input type="number" id="age-m" placeholder="25" min="16" max="80">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY LEVEL -->
+      <div class="panel">
+        <div class="panel-title">Activity Level</div>
+        <div class="option-grid" id="activity-options">
+          <label class="option-card" data-val="1.2">
+            <input type="radio" name="activity" value="1.2">
+            <div class="option-radio"></div>
+            <div>
+              <div class="option-label">Sedentary</div>
+              <div class="option-sub">Desk job · little to no exercise</div>
+            </div>
+          </label>
+          <label class="option-card" data-val="1.375">
+            <input type="radio" name="activity" value="1.375">
+            <div class="option-radio"></div>
+            <div>
+              <div class="option-label">Lightly Active</div>
+              <div class="option-sub">Light exercise 1–3 days/week</div>
+            </div>
+          </label>
+          <label class="option-card selected" data-val="1.55">
+            <input type="radio" name="activity" value="1.55" checked>
+            <div class="option-radio"></div>
+            <div>
+              <div class="option-label">Moderately Active</div>
+              <div class="option-sub">Exercise 3–5 days/week</div>
+            </div>
+          </label>
+          <label class="option-card" data-val="1.725">
+            <input type="radio" name="activity" value="1.725">
+            <div class="option-radio"></div>
+            <div>
+              <div class="option-label">Very Active</div>
+              <div class="option-sub">Hard training 6–7 days/week</div>
+            </div>
+          </label>
+          <label class="option-card" data-val="1.9">
+            <input type="radio" name="activity" value="1.9">
+            <div class="option-radio"></div>
+            <div>
+              <div class="option-label">Extra Active</div>
+              <div class="option-sub">Physical job + daily training</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- PREP PHASE -->
+      <div class="panel">
+        <div class="panel-title">Prep Phase</div>
+        <div class="phase-grid" id="phase-options">
+          <label class="phase-card" data-phase="maintenance" data-adj="0">
+            <input type="radio" name="phase" value="maintenance">
+            <div class="phase-name">Maintenance</div>
+            <div class="phase-desc">Eat at TDEE · sustain current physique</div>
+          </label>
+          <label class="phase-card" data-phase="bulk" data-adj="300">
+            <input type="radio" name="phase" value="bulk">
+            <div class="phase-name" style="color:#facc15">Bulk</div>
+            <div class="phase-desc">+300 kcal surplus · build muscle</div>
+          </label>
+          <label class="phase-card selected" data-phase="cut" data-adj="-400">
+            <input type="radio" name="phase" value="cut" checked>
+            <div class="phase-name" style="color:#4ade80">Cut</div>
+            <div class="phase-desc">−400 kcal deficit · lean out</div>
+          </label>
+          <label class="phase-card" data-phase="peak" data-adj="-500">
+            <input type="radio" name="phase" value="peak">
+            <div class="phase-name" style="color:#e8ff47">Peak Week</div>
+            <div class="phase-desc">−500 kcal · final stage prep</div>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-save" id="save-btn" disabled>Save My Goals</button>
+    </div>
+
+    <!-- ════════════════ RIGHT SIDEBAR ════════════════ -->
+    <div class="sidebar">
+      <div class="panel" id="results-panel">
+
+        <div id="results-empty" class="empty-results">
+          <div class="e-icon">⚡</div>
+          Fill in your stats to see<br>your calculated targets
+        </div>
+
+        <div id="results-content" style="display:none">
+          <div id="phase-badge-display" class="phase-badge-display">Cut Phase</div>
+
+          <div class="result-cal" id="r-target-cal">—</div>
+          <div class="result-cal-label">Daily Calorie Target</div>
+
+          <div class="calc-row">
+            <span class="calc-row-label">Basal Metabolic Rate (BMR)</span>
+            <span class="calc-row-val" id="r-bmr">—</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-row-label">Total Daily Energy (TDEE)</span>
+            <span class="calc-row-val" id="r-tdee">—</span>
+          </div>
+          <div class="calc-row">
+            <span class="calc-row-label">Phase Adjustment</span>
+            <span class="calc-row-val" id="r-adj">—</span>
+          </div>
+
+          <div class="macro-result-grid">
+            <div class="macro-result-card">
+              <div class="accent-line" style="background:var(--protein)"></div>
+              <div class="mr-val" style="color:var(--protein)"><span id="r-protein">—</span><span class="mr-unit">g</span></div>
+              <div class="mr-label">Protein</div>
+              <div class="mr-cal" id="r-protein-cal">—</div>
+            </div>
+            <div class="macro-result-card">
+              <div class="accent-line" style="background:var(--carbs)"></div>
+              <div class="mr-val" style="color:var(--carbs)"><span id="r-carbs">—</span><span class="mr-unit">g</span></div>
+              <div class="mr-label">Carbs</div>
+              <div class="mr-cal" id="r-carbs-cal">—</div>
+            </div>
+            <div class="macro-result-card">
+              <div class="accent-line" style="background:var(--fat)"></div>
+              <div class="mr-val" style="color:var(--fat)"><span id="r-fat">—</span><span class="mr-unit">g</span></div>
+              <div class="mr-label">Fat</div>
+              <div class="mr-cal" id="r-fat-cal">—</div>
+            </div>
+          </div>
+
+          <div class="formula-note">
+            Mifflin-St Jeor formula · physique-athlete macro standards<br>
+            Protein: 1g/lb · Fat: 0.35g/lb · Carbs: remaining kcal ÷ 4
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">✓ Goals Saved</div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    let currentUnit = 'imperial';
+
+    // ── UNIT TOGGLE ──────────────────────────────────────────────
+    document.querySelectorAll('.unit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentUnit = btn.dataset.unit;
+        $('imperial-fields').style.display = currentUnit === 'imperial' ? 'block' : 'none';
+        $('metric-fields').style.display   = currentUnit === 'metric'   ? 'block' : 'none';
+        calculate();
+      });
+    });
+
+    // ── OPTION CARD SELECTION ────────────────────────────────────
+    document.querySelectorAll('#activity-options .option-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('#activity-options .option-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        card.querySelector('input').checked = true;
+        calculate();
+      });
+    });
+
+    document.querySelectorAll('#phase-options .phase-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('#phase-options .phase-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        card.querySelector('input').checked = true;
+        calculate();
+      });
+    });
+
+    // ── INPUT LISTENERS ──────────────────────────────────────────
+    ['weight-lbs','height-ft','height-in','age','weight-kg','height-cm','age-m']
+      .forEach(id => $(id)?.addEventListener('input', calculate));
+
+    // ── CALCULATE ────────────────────────────────────────────────
+    function getInputs() {
+      let weightKg, heightCm, age;
+      if (currentUnit === 'imperial') {
+        const lbs = parseFloat($('weight-lbs').value) || 0;
+        const ft  = parseFloat($('height-ft').value)  || 0;
+        const ins = parseFloat($('height-in').value)  || 0;
+        age       = parseFloat($('age').value)         || 0;
+        weightKg  = lbs * 0.453592;
+        heightCm  = (ft * 30.48) + (ins * 2.54);
+      } else {
+        weightKg  = parseFloat($('weight-kg').value)  || 0;
+        heightCm  = parseFloat($('height-cm').value)  || 0;
+        age       = parseFloat($('age-m').value)       || 0;
+      }
+      const activity = parseFloat(document.querySelector('input[name="activity"]:checked')?.value) || 1.55;
+      const phaseCard = document.querySelector('#phase-options .phase-card.selected');
+      const phaseAdj  = parseFloat(phaseCard?.dataset.adj) || 0;
+      const phaseName = phaseCard?.dataset.phase || 'cut';
+      return { weightKg, heightCm, age, activity, phaseAdj, phaseName };
+    }
+
+    function calculate() {
+      const { weightKg, heightCm, age, activity, phaseAdj, phaseName } = getInputs();
+      const weightLbs = weightKg / 0.453592;
+
+      if (!weightKg || !heightCm || !age) {
+        $('results-empty').style.display = 'block';
+        $('results-content').style.display = 'none';
+        $('save-btn').disabled = true;
+        return;
+      }
+
+      // Mifflin-St Jeor (men)
+      const bmr   = Math.round(10 * weightKg + 6.25 * heightCm - 5 * age + 5);
+      const tdee  = Math.round(bmr * activity);
+      const target = tdee + phaseAdj;
+
+      // Macro targets — physique athlete standards
+      const protein = Math.round(weightLbs * 1.0);       // 1g/lb
+      const fat     = Math.round(weightLbs * 0.35);      // 0.35g/lb
+      const carbCal = target - (protein * 4) - (fat * 9);
+      const carbs   = Math.max(0, Math.round(carbCal / 4));
+
+      // Render
+      $('results-empty').style.display = 'none';
+      $('results-content').style.display = 'block';
+      $('save-btn').disabled = false;
+
+      const phaseLabels = { maintenance: 'Maintenance', bulk: 'Bulk Phase', cut: 'Cut Phase', peak: 'Peak Week' };
+      $('phase-badge-display').textContent = phaseLabels[phaseName] || 'Cut Phase';
+      $('r-target-cal').textContent = target.toLocaleString();
+      $('r-bmr').textContent  = bmr.toLocaleString() + ' kcal';
+      $('r-tdee').textContent = tdee.toLocaleString() + ' kcal';
+      $('r-adj').textContent  = (phaseAdj >= 0 ? '+' : '') + phaseAdj + ' kcal';
+      $('r-protein').textContent    = protein;
+      $('r-carbs').textContent      = carbs;
+      $('r-fat').textContent        = fat;
+      $('r-protein-cal').textContent = protein * 4 + ' kcal';
+      $('r-carbs-cal').textContent   = carbs   * 4 + ' kcal';
+      $('r-fat-cal').textContent     = fat     * 9 + ' kcal';
+
+      // Store computed values for save
+      window._computed = { bmr, tdee, target, protein, carbs, fat, phaseName, phaseAdj, weightKg, heightCm, age: parseFloat(document.querySelector('[id^=age]')?.value) || 0 };
+    }
+
+    // ── POPULATE FORM FROM PROFILE OBJECT ────────────────────────
+    function populateForm(p) {
+      if (!p) return;
+      if (p.units === 'metric') {
+        document.querySelector('[data-unit="metric"]').click();
+      }
+      if (p.units === 'imperial') {
+        const lbs     = Math.round(p.weightKg / 0.453592 * 2) / 2;
+        const totalIn = p.heightCm / 2.54;
+        $('weight-lbs').value = lbs;
+        $('height-ft').value  = Math.floor(totalIn / 12);
+        $('height-in').value  = Math.round(totalIn % 12);
+        $('age').value        = p.age;
+      } else {
+        $('weight-kg').value = Math.round(p.weightKg * 2) / 2;
+        $('height-cm').value = Math.round(p.heightCm);
+        $('age-m').value     = p.age;
+      }
+      const actCard = document.querySelector(`#activity-options .option-card[data-val="${p.activity}"]`);
+      if (actCard) {
+        document.querySelectorAll('#activity-options .option-card').forEach(c => c.classList.remove('selected'));
+        actCard.classList.add('selected');
+        actCard.querySelector('input').checked = true;
+      }
+      const phCard = document.querySelector(`#phase-options .phase-card[data-phase="${p.phaseName}"]`);
+      if (phCard) {
+        document.querySelectorAll('#phase-options .phase-card').forEach(c => c.classList.remove('selected'));
+        phCard.classList.add('selected');
+        phCard.querySelector('input').checked = true;
+      }
+      calculate();
+    }
+
+    // ── SAVE ─────────────────────────────────────────────────────
+    $('save-btn').addEventListener('click', async () => {
+      if (!window._computed) return;
+      const { weightKg, heightCm, age, activity, phaseAdj, phaseName } = getInputs();
+      const c = window._computed;
+      const profile = {
+        units: currentUnit,
+        weightKg, heightCm, age,
+        activity, phaseAdj, phaseName,
+        targets: { calories: c.target, protein: c.protein, carbs: c.carbs, fat: c.fat },
+        bmr: c.bmr, tdee: c.tdee,
+      };
+      saveLocalProfile(profile);
+      if (auth.currentUser) {
+        await saveProfileToCloud(profile);
+      }
+      const toast = $('toast');
+      toast.classList.add('show');
+      setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+    });
+
+    // ── LOAD ON AUTH STATE ────────────────────────────────────────
+    auth.onAuthStateChanged(async (user) => {
+      renderAuthNav(user);
+      let profile = null;
+      if (user) {
+        profile = await loadProfileFromCloud();
+        if (profile) saveLocalProfile(profile);
+      }
+      if (!profile) profile = getLocalProfile();
+      populateForm(profile);
+    });
+  </script>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MACRO LAB — Men's Physique Nutrition</title>
+  <title>LATTITUDE — Your Fitness, Your Way</title>
   <link rel="stylesheet" href="styles/global.css">
   <style>
     @keyframes fadeUp {
@@ -80,19 +80,49 @@
 <body>
 
   <nav class="nav">
-    <a href="index.html" class="nav-logo">MACRO<span>LAB</span></a>
+    <a href="index.html" class="nav-logo">LATT<span>ITUDE</span></a>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div id="auth-nav"></div>
+      <a href="profile.html" class="btn-add" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border)">My Goals</a>
+      <a href="builder.html" class="btn-add">+ Build Recipe</a>
+    </div>
   </nav>
 
   <div class="hero">
-    <div class="hero-eyebrow">// Men's Physique Nutrition Dashboard</div>
-    <h1 class="hero-title">SCULPT YOUR<br><span class="hl">PHYSIQUE</span></h1>
-    <p class="hero-sub">Track macros, analyze every recipe, and dial in your nutrition for stage-ready conditioning and aesthetic development.</p>
-    <div class="stats-bar">
-      <div class="stat-item"><div class="si-val" id="stat-count" style="color:var(--accent)">—</div><div class="si-label">Recipes Logged</div></div>
-      <div class="stat-item"><div class="si-val" id="stat-protein" style="color:var(--protein)">—</div><div class="si-label">Avg Protein / Serving</div></div>
-      <div class="stat-item"><div class="si-val" id="stat-carbs" style="color:var(--carbs)">—</div><div class="si-label">Avg Carbs / Serving</div></div>
-      <div class="stat-item"><div class="si-val" id="stat-fat" style="color:var(--fat)">—</div><div class="si-label">Avg Fat / Serving</div></div>
-      <div class="stat-item"><div class="si-val" id="stat-calories">—</div><div class="si-label">Avg Calories / Serving</div></div>
+    <div class="hero-eyebrow">// Nutrition · Training · Physique — All In One</div>
+    <h1 class="hero-title">DEFINE YOUR<br><span class="hl">LATTITUDE</span></h1>
+    <p class="hero-sub">Your body, your rules. Track nutrition, training, and your full fitness journey — one app built around your attitude to push past every limit.</p>
+    <!-- GOALS BAR — populated from localStorage profile -->
+    <div id="goals-bar-set" class="stats-bar" style="display:none">
+      <div class="stat-item">
+        <div class="si-val" id="gb-phase" style="color:var(--accent);font-size:18px;letter-spacing:2px">—</div>
+        <div class="si-label">Prep Phase</div>
+      </div>
+      <div class="stat-item">
+        <div class="si-val" id="gb-protein" style="color:var(--protein)">—</div>
+        <div class="si-label">Daily Protein</div>
+      </div>
+      <div class="stat-item">
+        <div class="si-val" id="gb-carbs" style="color:var(--carbs)">—</div>
+        <div class="si-label">Daily Carbs</div>
+      </div>
+      <div class="stat-item">
+        <div class="si-val" id="gb-fat" style="color:var(--fat)">—</div>
+        <div class="si-label">Daily Fat</div>
+      </div>
+      <div class="stat-item">
+        <div class="si-val" id="gb-cal">—</div>
+        <div class="si-label">Daily Calories</div>
+      </div>
+    </div>
+
+    <!-- NO PROFILE SET -->
+    <div id="goals-bar-empty" class="stats-bar" style="align-items:center;justify-content:space-between;padding:20px 24px">
+      <div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:4px">Set Your Daily Goals</div>
+        <div style="font-size:12px;color:var(--muted);font-weight:300">Input your stats to calculate your macro targets and prep phase.</div>
+      </div>
+      <a href="profile.html" class="btn-add" style="white-space:nowrap;flex-shrink:0">Set Up Goals →</a>
     </div>
   </div>
 
@@ -107,18 +137,27 @@
 
   <div class="recipe-grid" id="recipe-grid"></div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
   <script src="recipes.js"></script>
   <script src="js/nav.js"></script>
   <script>
-    function buildStats(recipes) {
-      const count = recipes.length;
-      if (!count) return;
-      const avg = key => recipes.reduce((s, r) => s + r.perServing[key], 0) / count;
-      document.getElementById('stat-count').textContent     = count;
-      document.getElementById('stat-protein').innerHTML    = avg('protein').toFixed(1) + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
-      document.getElementById('stat-carbs').innerHTML      = avg('carbs').toFixed(1)   + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
-      document.getElementById('stat-fat').innerHTML        = avg('fat').toFixed(1)     + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
-      document.getElementById('stat-calories').textContent = Math.round(avg('calories'));
+    function displayGoalsBar(p) {
+      if (!p || !p.targets) {
+        document.getElementById('goals-bar-empty').style.display = 'flex';
+        document.getElementById('goals-bar-set').style.display   = 'none';
+        return;
+      }
+      const phaseLabels = { maintenance: 'Maintenance', bulk: 'Bulk', cut: 'Cut', peak: 'Peak Week' };
+      document.getElementById('goals-bar-empty').style.display = 'none';
+      document.getElementById('goals-bar-set').style.display   = 'flex';
+      document.getElementById('gb-phase').textContent   = phaseLabels[p.phaseName] || p.phaseName;
+      document.getElementById('gb-protein').innerHTML   = p.targets.protein + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
+      document.getElementById('gb-carbs').innerHTML     = p.targets.carbs   + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
+      document.getElementById('gb-fat').innerHTML       = p.targets.fat     + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
+      document.getElementById('gb-cal').textContent     = p.targets.calories.toLocaleString();
     }
 
     function buildFilters(recipes) {
@@ -194,9 +233,20 @@
       });
     }
 
-    buildStats(RECIPES);
     buildFilters(RECIPES);
     buildCards(RECIPES);
+
+    // Auth state drives the goals bar
+    auth.onAuthStateChanged(async (user) => {
+      renderAuthNav(user);
+      let profile = null;
+      if (user) {
+        profile = await loadProfileFromCloud();
+        if (profile) saveLocalProfile(profile);
+      }
+      if (!profile) profile = getLocalProfile();
+      displayGoalsBar(profile);
+    });
   </script>
 
 </body>

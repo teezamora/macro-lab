@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe Builder — LATTITUDE</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <style>
+    /* ── LAYOUT ─────────────────────────────────────────── */
+    .builder-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(10,11,12,0.92); backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    .builder-body {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 36px 40px 80px;
+      align-items: start;
+    }
+
+    /* ── PANEL ──────────────────────────────────────────── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 1px;
+      margin-bottom: 18px; color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── FORM FIELDS ────────────────────────────────────── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .field-row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+    .field-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .field-full { margin-bottom: 10px; }
+
+    label {
+      display: block;
+      font-size: 10px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 5px; font-family: 'DM Mono', monospace;
+    }
+    input[type="text"], input[type="number"], input[type="email"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--muted2); }
+
+    /* tags checkboxes */
+    .tag-checkboxes { display: flex; flex-wrap: wrap; gap: 7px; }
+    .tag-check { display: none; }
+    .tag-check + label {
+      padding: 5px 12px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 11px; font-family: 'DM Sans', sans-serif;
+      font-weight: 500; color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+      text-transform: none; letter-spacing: 0;
+      margin-bottom: 0;
+    }
+    .tag-check:checked + label { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    /* ── ADD INGREDIENT BUTTON ──────────────────────────── */
+    .btn-primary {
+      background: var(--accent); color: #000;
+      border: none; font-family: 'DM Mono', monospace;
+      font-size: 11px; font-weight: 500; letter-spacing: 1.5px;
+      padding: 11px 20px; border-radius: 7px;
+      cursor: pointer; text-transform: uppercase;
+      transition: all 0.15s; width: 100%; margin-top: 4px;
+    }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── INGREDIENT TABLE ───────────────────────────────── */
+    .empty-ingredients {
+      text-align: center; padding: 32px 20px;
+      color: var(--muted2); font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .ing-table-wrap { overflow-x: auto; }
+    .ing-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; min-width: 520px; }
+    .ing-table th {
+      font-size: 9px; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 1.2px; padding: 0 10px 6px; text-align: right;
+      font-weight: 500;
+    }
+    .ing-table th:first-child { text-align: left; }
+    .ing-table td {
+      background: var(--surface2); padding: 10px;
+      text-align: right; font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .ing-table td:first-child {
+      text-align: left; font-family: 'DM Sans', sans-serif;
+      font-size: 12px; color: var(--text); font-weight: 500;
+      border-left: 1px solid var(--border); border-radius: 8px 0 0 8px;
+      padding-left: 12px;
+    }
+    .ing-table td:last-child { border-right: 1px solid var(--border); border-radius: 0 8px 8px 0; }
+    .totals-row td { background: var(--surface3); color: var(--text); border-color: var(--border2); }
+    .totals-row td:first-child {
+      font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+      letter-spacing: 1px; color: var(--accent); border-left: 3px solid var(--accent);
+    }
+    .del-btn {
+      background: none; border: none; color: var(--muted2);
+      cursor: pointer; font-size: 14px; padding: 2px 6px;
+      border-radius: 4px; transition: all 0.15s; line-height: 1;
+    }
+    .del-btn:hover { color: #f87171; background: rgba(248,113,113,0.1); }
+    .gram-sub { font-size: 9px; color: var(--muted2); display: block; font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+    /* ── RIGHT SIDEBAR (STICKY) ─────────────────────────── */
+    .sidebar { position: sticky; top: 88px; }
+
+    /* ── MACRO DASHBOARD (mirrors recipe page) ─────────── */
+    .cal-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px; position: relative; overflow: hidden;
+    }
+    .cal-card::before {
+      content: ''; position: absolute; right: -20px; top: -20px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(232,255,71,0.06) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .cal-num { font-family: 'Bebas Neue', sans-serif; font-size: 58px; line-height: 1; color: var(--accent); }
+    .cal-label { font-size: 10px; color: var(--muted); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; }
+    .cal-sub { font-size: 11px; color: var(--muted2); margin-top: 3px; }
+
+    .ring-wrap { display: flex; align-items: center; gap: 14px; }
+    .ring-svg { width: 76px; height: 76px; }
+    .ring-legend { display: flex; flex-direction: column; gap: 5px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    .macro-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .macro-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px 14px 12px; position: relative; overflow: hidden;
+    }
+    .macro-card .accent-line {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px; border-radius: 10px 10px 0 0;
+    }
+    .macro-card .m-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .macro-card .m-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; margin-bottom: 2px; }
+    .macro-card .m-unit { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 300; }
+    .macro-card .m-pct-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 8px; }
+    .macro-card .m-pct-fill { height: 100%; border-radius: 3px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+
+    /* ── SERVINGS CONTROL IN SIDEBAR ────────────────────── */
+    .servings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 13px 16px; margin-bottom: 10px;
+    }
+    .servings-row label { font-size: 12px; color: var(--muted); text-transform: none; letter-spacing: 0; font-family: 'DM Sans'; margin: 0; }
+    .servings-input-wrap { display: flex; align-items: center; gap: 10px; }
+    .serv-btn {
+      width: 30px; height: 30px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface3);
+      color: var(--text); font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+    .serv-btn:hover { border-color: var(--accent); color: var(--accent); }
+    #serv-display {
+      font-family: 'Bebas Neue', sans-serif; font-size: 26px;
+      min-width: 36px; text-align: center; color: var(--accent);
+    }
+
+    /* ── EXPORT PANEL ───────────────────────────────────── */
+    .export-panel { margin-top: 0; }
+    .code-block {
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px;
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--muted); line-height: 1.7; white-space: pre;
+      overflow-x: auto; max-height: 220px; overflow-y: auto;
+    }
+    .copy-btn {
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--muted); font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 1px; padding: 8px 14px;
+      border-radius: 6px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase; margin-top: 8px; width: 100%;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn.copied { border-color: #4ade80; color: #4ade80; }
+
+    /* ── EMPTY DASHBOARD STATE ──────────────────────────── */
+    .dash-empty {
+      text-align: center; padding: 40px 20px;
+      color: var(--muted2); font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .dash-empty .de-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.3; }
+
+    /* ── BATCH WEIGHING ─────────────────────────────────────── */
+    .suggestion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .suggestion-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 9px; padding: 14px 10px 12px; cursor: pointer;
+      transition: all 0.15s; text-align: center; position: relative;
+    }
+    .suggestion-card:hover { border-color: var(--border2); }
+    .suggestion-card.recommended { border-color: var(--accent); background: rgba(232,255,71,0.04); }
+    .suggestion-card.selected { border-color: var(--accent); background: rgba(232,255,71,0.08); box-shadow: 0 0 0 1px var(--accent); }
+    .sc-badge {
+      position: absolute; top: -9px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: #000;
+      font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px;
+      padding: 2px 8px; border-radius: 3px; white-space: nowrap; text-transform: uppercase;
+    }
+    .sc-count   { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--accent); line-height: 1; margin-bottom: 3px; }
+    .sc-weight  { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    .sc-protein { font-size: 11px; color: var(--protein); font-family: 'DM Mono', monospace; margin-top: 5px; font-weight: 500; }
+
+    .batch-method-toggle { display: flex; border: 1px solid var(--border); border-radius: 7px; overflow: hidden; }
+    .bm-btn {
+      flex: 1; padding: 9px 14px; font-family: 'DM Mono', monospace;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      border: none; background: var(--surface2); color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .bm-btn:first-child { border-right: 1px solid var(--border); }
+    .bm-btn.active { background: var(--accent); color: #000; }
+    .bm-btn:not(.active):hover { color: var(--text); }
+
+    .batch-result {
+      background: var(--surface3); border: 1px solid var(--border2);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px; padding: 14px 16px; margin-top: 12px;
+    }
+    .batch-result-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+    .br-big  { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; color: var(--accent); }
+    .br-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    .br-sep  { font-size: 16px; color: var(--muted2); margin: 0 2px; }
+    .br-yield { margin-top: 8px; font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); }
+
+    /* ── TAB BAR ────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      max-width: 1140px; margin: 0 auto;
+      padding: 24px 40px 0;
+    }
+    .tab-btn {
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 10px 22px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .tab-btn:first-child { border-radius: 8px 0 0 8px; }
+    .tab-btn:last-child  { border-radius: 0 8px 8px 0; border-left: none; }
+    .tab-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    .tab-btn:not(.active):hover { color: var(--text); border-color: var(--border2); }
+
+    /* ── REVERSE ENGINEER ───────────────────────────────────── */
+    .re-bar-wrap { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+    .re-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+    .re-macro-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .re-macro-label { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .re-macro-nums  { font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); }
+
+    .solve-hint {
+      background: var(--surface3); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 12px 14px; margin-top: 10px;
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      color: var(--muted); line-height: 1.8; display: none;
+    }
+    .solve-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .solve-apply {
+      background: none; border: 1px solid var(--border2);
+      color: var(--accent); font-family: 'DM Mono', monospace;
+      font-size: 10px; letter-spacing: 1px; padding: 3px 10px;
+      border-radius: 4px; cursor: pointer; transition: all 0.15s;
+      text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+    }
+    .solve-apply:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    .re-cal-display { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1; color: var(--accent); margin-bottom: 2px; }
+    .re-cal-label   { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+
+    .re-summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .re-summary-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+    .re-summary-card .rs-val   { font-family: 'Bebas Neue', sans-serif; font-size: 24px; line-height: 1; }
+    .re-summary-card .rs-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 3px; }
+    .re-summary-card .rs-rem   { font-size: 9px; font-family: 'DM Mono', monospace; margin-top: 4px; }
+
+    .status-badge {
+      display: inline-block; font-family: 'DM Mono', monospace;
+      font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 3px; margin-bottom: 14px;
+    }
+    .status-empty { background: var(--surface3); color: var(--muted2); }
+    .status-ok    { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+    .status-over  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+    .status-under { background: rgba(250,204,21,0.10); color: #facc15; border: 1px solid rgba(250,204,21,0.2); }
+
+    /* ── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .builder-body { grid-template-columns: 1fr; }
+      .sidebar { position: static; }
+      .builder-nav { padding: 16px 20px; }
+      .builder-body { padding: 24px 20px 60px; }
+      .field-row-4 { grid-template-columns: repeat(2, 1fr); }
+      .tab-bar { padding: 16px 20px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="builder-nav">
+    <a href="index.html" class="back-btn"><span class="back-arrow">←</span> All Recipes</a>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div id="auth-nav"></div>
+      <a href="index.html" class="nav-logo" style="font-size:18px">LATT<span>ITUDE</span></a>
+    </div>
+  </nav>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" data-tab="builder">Builder</button>
+    <button class="tab-btn" data-tab="reverse">Reverse Engineer</button>
+  </div>
+
+  <!-- ══════════════════ BUILDER TAB (existing) ══════════════════ -->
+  <div id="tab-builder" class="builder-body">
+
+    <!-- ═══════════════════════════════════ LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- RECIPE SETUP -->
+      <div class="panel">
+        <div class="panel-title">Recipe Setup</div>
+
+        <div class="field-row">
+          <div>
+            <label for="r-name">Recipe Name</label>
+            <input type="text" id="r-name" placeholder="e.g. Tuna Mayo Wrap" maxlength="60">
+          </div>
+          <div>
+            <label for="r-emoji">Emoji</label>
+            <input type="text" id="r-emoji" placeholder="🍽️" maxlength="4">
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div>
+            <label for="r-desc">Short Description</label>
+            <input type="text" id="r-desc" placeholder="e.g. Quick high-protein wrap · 3 ingredients" maxlength="80">
+          </div>
+          <div>
+            <label for="r-servings-setup">Number of Servings</label>
+            <input type="number" id="r-servings-setup" placeholder="4" min="1" max="99" value="1">
+          </div>
+        </div>
+
+        <div class="field-full">
+          <label>Tags</label>
+          <div class="tag-checkboxes">
+            <input type="checkbox" class="tag-check" id="t-breakfast" value="Breakfast">
+            <label for="t-breakfast">Breakfast</label>
+            <input type="checkbox" class="tag-check" id="t-lunch" value="Lunch">
+            <label for="t-lunch">Lunch</label>
+            <input type="checkbox" class="tag-check" id="t-dinner" value="Dinner">
+            <label for="t-dinner">Dinner</label>
+            <input type="checkbox" class="tag-check" id="t-snack" value="Snack">
+            <label for="t-snack">Snack</label>
+            <input type="checkbox" class="tag-check" id="t-hiprotein" value="High Protein">
+            <label for="t-hiprotein">High Protein</label>
+            <input type="checkbox" class="tag-check" id="t-mealprep" value="Meal Prep">
+            <label for="t-mealprep">Meal Prep</label>
+            <input type="checkbox" class="tag-check" id="t-postworkout" value="Post-Workout">
+            <label for="t-postworkout">Post-Workout</label>
+            <input type="checkbox" class="tag-check" id="t-bulk" value="Bulk">
+            <label for="t-bulk">Bulk</label>
+            <input type="checkbox" class="tag-check" id="t-cut" value="Cut">
+            <label for="t-cut">Cut</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD INGREDIENT -->
+      <div class="panel">
+        <div class="panel-title">Add Ingredient</div>
+
+        <div class="field-row-3">
+          <div>
+            <label for="i-name">Ingredient Name</label>
+            <input type="text" id="i-name" placeholder="e.g. Canned Tuna in Water">
+          </div>
+          <div>
+            <label for="i-grams">Weight (grams)</label>
+            <input type="number" id="i-grams" placeholder="120" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="i-source">USDA # or Source</label>
+            <input type="text" id="i-source" placeholder="Optional">
+          </div>
+        </div>
+
+        <p style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.8px;margin-bottom:10px;">PER 100G VALUES (from USDA FoodData Central or package label)</p>
+
+        <div class="field-row-4">
+          <div>
+            <label for="i-kcal">Calories (kcal)</label>
+            <input type="number" id="i-kcal" placeholder="116" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="i-protein">Protein (g)</label>
+            <input type="number" id="i-protein" placeholder="25.5" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="i-carbs">Carbs (g)</label>
+            <input type="number" id="i-carbs" placeholder="0.0" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="i-fat">Fat (g)</label>
+            <input type="number" id="i-fat" placeholder="0.9" min="0" step="0.1">
+          </div>
+        </div>
+
+        <div class="field-row-3" style="margin-top:4px">
+          <div>
+            <label for="i-fiber">Fiber (g) <span style="color:var(--muted2)">optional</span></label>
+            <input type="number" id="i-fiber" placeholder="0.0" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="i-sugar">Sugar (g) <span style="color:var(--muted2)">optional</span></label>
+            <input type="number" id="i-sugar" placeholder="0.0" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="i-sodium">Sodium (mg) <span style="color:var(--muted2)">optional</span></label>
+            <input type="number" id="i-sodium" placeholder="0" min="0" step="1">
+          </div>
+        </div>
+
+        <button class="btn-primary" id="add-btn">+ Add Ingredient</button>
+      </div>
+
+      <!-- INGREDIENT BREAKDOWN -->
+      <div class="panel">
+        <div class="panel-title">Ingredient Breakdown</div>
+
+        <div id="ing-empty" class="empty-ingredients">No ingredients yet — add one above</div>
+
+        <div class="ing-table-wrap" id="ing-table-wrap" style="display:none">
+          <table class="ing-table">
+            <thead>
+              <tr>
+                <th>Ingredient</th>
+                <th>kcal</th>
+                <th>Protein</th>
+                <th>Carbs</th>
+                <th>Fat</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="ing-tbody"></tbody>
+            <tfoot>
+              <tr class="totals-row" id="totals-row">
+                <td>FULL RECIPE TOTAL</td>
+                <td id="tot-cal">—</td>
+                <td id="tot-protein">—</td>
+                <td id="tot-carbs">—</td>
+                <td id="tot-fat">—</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- BATCH WEIGHING -->
+      <div class="panel" id="batch-panel">
+        <div class="panel-title">Batch Weighing</div>
+        <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.8px;margin-bottom:16px;">Weigh your finished batch after cooking. This accounts for water loss and gives you accurate per-serving macros based on actual cooked weight.</p>
+
+        <div class="field-row">
+          <div>
+            <label for="batch-total-weight">Finished Batch Weight (g)</label>
+            <input type="number" id="batch-total-weight" placeholder="e.g. 765" min="0" step="1">
+          </div>
+          <div id="batch-raw-display" style="display:none">
+            <label>Raw Ingredients Total</label>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:13px;color:var(--muted)" id="batch-raw-val">—g</div>
+          </div>
+        </div>
+
+        <!-- SUGGESTIONS -->
+        <div id="batch-suggestions" style="display:none;margin-top:14px">
+          <label style="display:block;margin-bottom:8px">Suggested Serving Sizes</label>
+          <div class="suggestion-grid" id="suggestion-grid"></div>
+        </div>
+
+        <div class="field-full" style="margin-top:14px">
+          <label>Or Define Manually</label>
+          <div class="batch-method-toggle">
+            <button class="bm-btn active" data-method="weight">Serving Weight</button>
+            <button class="bm-btn" data-method="count">Serving Count</button>
+          </div>
+        </div>
+
+        <div id="batch-by-weight">
+          <div class="field-full">
+            <label for="batch-serving-weight">Each Serving Weighs (g)</label>
+            <input type="number" id="batch-serving-weight" placeholder="e.g. 45" min="0" step="0.5">
+          </div>
+        </div>
+
+        <div id="batch-by-count" style="display:none">
+          <div class="field-full">
+            <label for="batch-serving-count">Number of Servings</label>
+            <input type="number" id="batch-serving-count" placeholder="e.g. 10" min="1" step="1">
+          </div>
+        </div>
+
+        <div id="batch-result" class="batch-result" style="display:none">
+          <div class="batch-result-row">
+            <span id="br-servings-val" class="br-big">—</span>
+            <span class="br-label">servings</span>
+            <span class="br-sep">·</span>
+            <span id="br-weight-val" class="br-big">—</span>
+            <span class="br-label">g each</span>
+          </div>
+          <div id="br-yield-row" class="br-yield" style="display:none">
+            <span id="br-yield-txt"></span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end .left-col -->
+
+    <!-- ═══════════════════════════════════ RIGHT COLUMN (SIDEBAR) -->
+    <div class="sidebar">
+
+      <!-- SERVING CONTROL -->
+      <div class="servings-row">
+        <label>Servings to display</label>
+        <div class="servings-input-wrap">
+          <button class="serv-btn" id="serv-minus">−</button>
+          <div id="serv-display">1</div>
+          <button class="serv-btn" id="serv-plus">+</button>
+        </div>
+      </div>
+
+      <!-- MACRO DASHBOARD -->
+      <div id="dash-empty-state" class="panel">
+        <div class="dash-empty">
+          <div class="de-icon">📊</div>
+          <div>Add ingredients to see<br>your macro breakdown</div>
+        </div>
+      </div>
+
+      <div id="dash-content" style="display:none">
+
+        <!-- CAL CARD + RING -->
+        <div class="cal-card">
+          <div>
+            <div class="cal-label">Calories</div>
+            <div class="cal-num" id="d-calories">0</div>
+            <div class="cal-sub" id="d-cal-sub">per 1 serving</div>
+          </div>
+          <div class="ring-wrap">
+            <svg class="ring-svg" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="#252729" stroke-width="10"/>
+              <circle id="d-ring-fat"  cx="45" cy="45" r="38" fill="none" stroke="#f97316" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+              <circle id="d-ring-carb" cx="45" cy="45" r="38" fill="none" stroke="#facc15" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+              <circle id="d-ring-prot" cx="45" cy="45" r="38" fill="none" stroke="#4ade80" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+            </svg>
+            <div class="ring-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div><span id="d-prot-pct" style="color:#4ade80;font-weight:600">—</span>&nbsp;Protein</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div><span id="d-carb-pct" style="color:#facc15;font-weight:600">—</span>&nbsp;Carbs</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span id="d-fat-pct" style="color:#f97316;font-weight:600">—</span>&nbsp;Fat</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MACRO CARDS -->
+        <div class="macro-grid">
+          <div class="macro-card">
+            <div class="accent-line" style="background:var(--protein)"></div>
+            <div class="m-label">Protein</div>
+            <div class="m-val" style="color:var(--protein)"><span id="d-protein">0</span><span class="m-unit">g</span></div>
+            <div class="m-pct-bar"><div class="m-pct-fill" id="d-prot-bar" style="background:var(--protein);width:0%"></div></div>
+          </div>
+          <div class="macro-card">
+            <div class="accent-line" style="background:var(--carbs)"></div>
+            <div class="m-label">Carbs</div>
+            <div class="m-val" style="color:var(--carbs)"><span id="d-carbs">0</span><span class="m-unit">g</span></div>
+            <div class="m-pct-bar"><div class="m-pct-fill" id="d-carb-bar" style="background:var(--carbs);width:0%"></div></div>
+          </div>
+          <div class="macro-card">
+            <div class="accent-line" style="background:var(--fat)"></div>
+            <div class="m-label">Fat</div>
+            <div class="m-val" style="color:var(--fat)"><span id="d-fat">0</span><span class="m-unit">g</span></div>
+            <div class="m-pct-bar"><div class="m-pct-fill" id="d-fat-bar" style="background:var(--fat);width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- EXPORT -->
+        <div class="panel export-panel">
+          <div class="panel-title" style="font-size:16px">Export to recipes.js</div>
+          <pre class="code-block" id="export-code">—</pre>
+          <button class="copy-btn" id="copy-btn">Copy Snippet</button>
+        </div>
+
+      </div><!-- end #dash-content -->
+
+    </div><!-- end .sidebar -->
+
+  </div><!-- end #tab-builder -->
+
+  <!-- ══════════════════ REVERSE ENGINEER TAB ══════════════════ -->
+  <div id="tab-reverse" class="builder-body" style="display:none">
+
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+
+      <!-- TARGETS -->
+      <div class="panel">
+        <div class="panel-title">Macro Targets</div>
+        <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.8px;margin-bottom:12px;">Set your per-serving targets. The solver works backwards to tell you how many grams of each ingredient you need.</p>
+        <button id="re-load-profile" class="copy-btn" style="width:auto;margin-bottom:14px;display:none">⚡ Load my daily goals from profile</button>
+        <div class="field-row-4">
+          <div>
+            <label for="re-t-protein">Protein (g)</label>
+            <input type="number" id="re-t-protein" placeholder="40" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="re-t-carbs">Carbs (g)</label>
+            <input type="number" id="re-t-carbs" placeholder="35" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="re-t-fat">Fat (g)</label>
+            <input type="number" id="re-t-fat" placeholder="12" min="0" step="0.1">
+          </div>
+          <div>
+            <label>Calories (auto)</label>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent)" id="re-t-cal-display">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD INGREDIENT -->
+      <div class="panel">
+        <div class="panel-title">Add Ingredient</div>
+
+        <div class="field-row-3">
+          <div>
+            <label for="re-i-name">Ingredient Name</label>
+            <input type="text" id="re-i-name" placeholder="e.g. Chicken Breast">
+          </div>
+          <div>
+            <label for="re-i-grams">Weight (grams)</label>
+            <input type="number" id="re-i-grams" placeholder="—" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="re-i-source">USDA # or Source</label>
+            <input type="text" id="re-i-source" placeholder="Optional">
+          </div>
+        </div>
+
+        <p style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.8px;margin-bottom:10px;">PER 100G VALUES</p>
+        <div class="field-row-4">
+          <div>
+            <label for="re-i-kcal">Calories</label>
+            <input type="number" id="re-i-kcal" placeholder="165" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="re-i-protein">Protein (g)</label>
+            <input type="number" id="re-i-protein" placeholder="31" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="re-i-carbs">Carbs (g)</label>
+            <input type="number" id="re-i-carbs" placeholder="0" min="0" step="0.1">
+          </div>
+          <div>
+            <label for="re-i-fat">Fat (g)</label>
+            <input type="number" id="re-i-fat" placeholder="3.6" min="0" step="0.1">
+          </div>
+        </div>
+
+        <!-- SOLVE HINTS -->
+        <div class="solve-hint" id="re-solve-hint">
+          <div id="re-solve-protein-row" class="solve-row" style="display:none">
+            <span id="re-solve-protein-txt"></span>
+            <button class="solve-apply" data-macro="protein">Use →</button>
+          </div>
+          <div id="re-solve-carbs-row" class="solve-row" style="display:none">
+            <span id="re-solve-carbs-txt"></span>
+            <button class="solve-apply" data-macro="carbs">Use →</button>
+          </div>
+          <div id="re-solve-fat-row" class="solve-row" style="display:none">
+            <span id="re-solve-fat-txt"></span>
+            <button class="solve-apply" data-macro="fat">Use →</button>
+          </div>
+          <div id="re-solve-preview" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);display:none">
+            <span style="color:var(--muted2)">At current grams: </span>
+            <span id="re-preview-txt"></span>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="re-add-btn" style="margin-top:12px">+ Add to Meal Plan</button>
+      </div>
+
+      <!-- MEAL PLAN TABLE -->
+      <div class="panel">
+        <div class="panel-title">Meal Plan</div>
+        <div id="re-ing-empty" class="empty-ingredients">No ingredients yet — add one above</div>
+        <div class="ing-table-wrap" id="re-table-wrap" style="display:none">
+          <table class="ing-table">
+            <thead>
+              <tr>
+                <th>Ingredient</th>
+                <th>kcal</th>
+                <th>Protein</th>
+                <th>Carbs</th>
+                <th>Fat</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="re-tbody"></tbody>
+            <tfoot>
+              <tr class="totals-row">
+                <td>ACHIEVED TOTAL</td>
+                <td id="re-tot-cal">—</td>
+                <td id="re-tot-protein">—</td>
+                <td id="re-tot-carbs">—</td>
+                <td id="re-tot-fat">—</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- end left col -->
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- ACHIEVED CALORIES -->
+      <div class="panel" id="re-dash-empty" style="margin-bottom:0">
+        <div class="dash-empty">
+          <div class="de-icon">🎯</div>
+          <div>Set targets and add ingredients<br>to see your progress</div>
+        </div>
+      </div>
+
+      <div id="re-dash-content" style="display:none">
+        <div class="panel" style="margin-bottom:10px">
+          <div class="re-cal-label">Achieved Calories</div>
+          <div class="re-cal-display" id="re-d-cal">0</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:16px" id="re-d-cal-sub">of — kcal target</div>
+
+          <div id="re-status-badge" class="status-badge status-empty">Add ingredients</div>
+
+          <!-- PROTEIN -->
+          <div class="re-macro-row">
+            <span class="re-macro-label" style="color:var(--protein)">Protein</span>
+            <span class="re-macro-nums" id="re-d-protein-nums">0 / —g</span>
+          </div>
+          <div class="re-bar-wrap">
+            <div class="re-bar-fill" id="re-d-protein-bar" style="background:var(--protein);width:0%"></div>
+          </div>
+
+          <!-- CARBS -->
+          <div class="re-macro-row">
+            <span class="re-macro-label" style="color:var(--carbs)">Carbs</span>
+            <span class="re-macro-nums" id="re-d-carbs-nums">0 / —g</span>
+          </div>
+          <div class="re-bar-wrap">
+            <div class="re-bar-fill" id="re-d-carbs-bar" style="background:var(--carbs);width:0%"></div>
+          </div>
+
+          <!-- FAT -->
+          <div class="re-macro-row">
+            <span class="re-macro-label" style="color:var(--fat)">Fat</span>
+            <span class="re-macro-nums" id="re-d-fat-nums">0 / —g</span>
+          </div>
+          <div class="re-bar-wrap">
+            <div class="re-bar-fill" id="re-d-fat-bar" style="background:var(--fat);width:0%"></div>
+          </div>
+        </div>
+
+        <!-- REMAINING SUMMARY -->
+        <div class="re-summary-grid">
+          <div class="re-summary-card">
+            <div class="rs-val" style="color:var(--protein)" id="re-rem-protein">—</div>
+            <div class="rs-label">Protein</div>
+            <div class="rs-rem" id="re-rem-protein-lbl" style="color:var(--muted2)">remaining</div>
+          </div>
+          <div class="re-summary-card">
+            <div class="rs-val" style="color:var(--carbs)" id="re-rem-carbs">—</div>
+            <div class="rs-label">Carbs</div>
+            <div class="rs-rem" id="re-rem-carbs-lbl" style="color:var(--muted2)">remaining</div>
+          </div>
+          <div class="re-summary-card">
+            <div class="rs-val" style="color:var(--fat)" id="re-rem-fat">—</div>
+            <div class="rs-label">Fat</div>
+            <div class="rs-rem" id="re-rem-fat-lbl" style="color:var(--muted2)">remaining</div>
+          </div>
+        </div>
+
+        <div class="panel" style="font-size:11px;color:var(--muted);line-height:1.7">
+          <strong style="color:var(--text);display:block;margin-bottom:4px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px">How to use</strong>
+          Add ingredients and watch the solve hints — each one tells you exactly how many grams to hit your remaining target for that macro. Use the <span style="color:var(--accent)">"Use →"</span> button to auto-fill the gram amount.
+        </div>
+      </div>
+
+    </div><!-- end sidebar -->
+
+  </div><!-- end #tab-reverse -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    // ── STATE ────────────────────────────────────────────────────
+    let ingredients = [];   // array of ingredient objects
+    let servingsDisplay = 1;
+
+    // ── HELPERS ──────────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+    const num = id => parseFloat($(id).value) || 0;
+    const txt = id => $(id).value.trim();
+    const fmt1 = v => v.toFixed(1);
+
+    function calc100(grams, per100) {
+      return (grams / 100) * per100;
+    }
+
+    function totals() {
+      return ingredients.reduce((acc, ing) => {
+        acc.cal     += calc100(ing.grams, ing.kcal100);
+        acc.protein += calc100(ing.grams, ing.protein100);
+        acc.carbs   += calc100(ing.grams, ing.carbs100);
+        acc.fat     += calc100(ing.grams, ing.fat100);
+        acc.fiber   += calc100(ing.grams, ing.fiber100);
+        acc.sugar   += calc100(ing.grams, ing.sugar100);
+        acc.sodium  += calc100(ing.grams, ing.sodium100);
+        return acc;
+      }, { cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0 });
+    }
+
+    // ── ADD INGREDIENT ───────────────────────────────────────────
+    $('add-btn').addEventListener('click', () => {
+      const name = txt('i-name');
+      const grams = num('i-grams');
+      const kcal100 = num('i-kcal');
+
+      if (!name || !grams || !kcal100) {
+        // highlight missing
+        ['i-name','i-grams','i-kcal'].forEach(id => {
+          if (!$(id).value.trim() || ($(id).type === 'number' && !num(id))) {
+            $(id).style.borderColor = '#f87171';
+            setTimeout(() => $(id).style.borderColor = '', 1200);
+          }
+        });
+        return;
+      }
+
+      ingredients.push({
+        id: Date.now(),
+        name,
+        grams,
+        source: txt('i-source'),
+        kcal100,
+        protein100: num('i-protein'),
+        carbs100:   num('i-carbs'),
+        fat100:     num('i-fat'),
+        fiber100:   num('i-fiber'),
+        sugar100:   num('i-sugar'),
+        sodium100:  num('i-sodium'),
+      });
+
+      // Clear ingredient fields (keep name for quick editing)
+      ['i-name','i-grams','i-source','i-kcal','i-protein','i-carbs','i-fat','i-fiber','i-sugar','i-sodium']
+        .forEach(id => $(id).value = '');
+
+      render();
+      $('i-name').focus();
+    });
+
+    // Allow Enter key on any ingredient field to trigger add
+    ['i-name','i-grams','i-source','i-kcal','i-protein','i-carbs','i-fat','i-fiber','i-sugar','i-sodium']
+      .forEach(id => {
+        $(id).addEventListener('keydown', e => {
+          if (e.key === 'Enter') $('add-btn').click();
+        });
+      });
+
+    // ── DELETE INGREDIENT ────────────────────────────────────────
+    $('ing-tbody').addEventListener('click', e => {
+      const btn = e.target.closest('.del-btn');
+      if (!btn) return;
+      const id = parseInt(btn.dataset.id, 10);
+      ingredients = ingredients.filter(i => i.id !== id);
+      render();
+    });
+
+    // ── SERVINGS CONTROL ─────────────────────────────────────────
+    $('serv-minus').addEventListener('click', () => {
+      servingsDisplay = Math.max(1, servingsDisplay - 1);
+      $('serv-display').textContent = servingsDisplay;
+      updateDashboard();
+    });
+    $('serv-plus').addEventListener('click', () => {
+      const maxServ = parseInt($('r-servings-setup').value) || 1;
+      servingsDisplay = Math.min(maxServ, servingsDisplay + 1);
+      $('serv-display').textContent = servingsDisplay;
+      updateDashboard();
+    });
+    $('r-servings-setup').addEventListener('input', () => {
+      const maxServ = parseInt($('r-servings-setup').value) || 1;
+      servingsDisplay = Math.min(servingsDisplay, maxServ);
+      $('serv-display').textContent = servingsDisplay;
+      updateDashboard();
+    });
+
+    // ── RENDER INGREDIENT TABLE ──────────────────────────────────
+    function renderTable() {
+      if (!ingredients.length) {
+        $('ing-empty').style.display = 'block';
+        $('ing-table-wrap').style.display = 'none';
+        return;
+      }
+      $('ing-empty').style.display = 'none';
+      $('ing-table-wrap').style.display = 'block';
+
+      const tbody = $('ing-tbody');
+      tbody.innerHTML = '';
+
+      ingredients.forEach(ing => {
+        const cal     = calc100(ing.grams, ing.kcal100);
+        const protein = calc100(ing.grams, ing.protein100);
+        const carbs   = calc100(ing.grams, ing.carbs100);
+        const fat     = calc100(ing.grams, ing.fat100);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            ${ing.name}
+            <span class="gram-sub">${ing.grams}g raw${ing.source ? ' · ' + ing.source : ''}</span>
+          </td>
+          <td>${Math.round(cal)}</td>
+          <td>${fmt1(protein)}g</td>
+          <td>${fmt1(carbs)}g</td>
+          <td>${fmt1(fat)}g</td>
+          <td><button class="del-btn" data-id="${ing.id}" title="Remove">×</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const t = totals();
+      $('tot-cal').textContent     = Math.round(t.cal);
+      $('tot-protein').textContent = fmt1(t.protein) + 'g';
+      $('tot-carbs').textContent   = fmt1(t.carbs) + 'g';
+      $('tot-fat').textContent     = fmt1(t.fat) + 'g';
+    }
+
+    // ── UPDATE MACRO DASHBOARD ───────────────────────────────────
+    function updateDashboard() {
+      if (!ingredients.length) {
+        $('dash-empty-state').style.display = 'block';
+        $('dash-content').style.display = 'none';
+        return;
+      }
+
+      $('dash-empty-state').style.display = 'none';
+      $('dash-content').style.display = 'block';
+
+      const bs = getBatchServings();
+      const totalServings = bs
+        ? bs.servingCount
+        : (parseInt($('r-servings-setup').value) || 1);
+      const s = servingsDisplay;
+      const t = totals();
+
+      const calPS     = (t.cal     * s / totalServings);
+      const proteinPS = (t.protein * s / totalServings);
+      const carbsPS   = (t.carbs   * s / totalServings);
+      const fatPS     = (t.fat     * s / totalServings);
+
+      // macro split % of calories
+      const totalCalMacros = proteinPS * 4 + carbsPS * 4 + fatPS * 9;
+      const protPct = totalCalMacros ? (proteinPS * 4 / totalCalMacros * 100) : 0;
+      const carbPct = totalCalMacros ? (carbsPS   * 4 / totalCalMacros * 100) : 0;
+      const fatPct  = totalCalMacros ? (fatPS     * 9 / totalCalMacros * 100) : 0;
+
+      $('d-calories').textContent = Math.round(calPS);
+      $('d-cal-sub').textContent  = `per ${s} serving${s !== 1 ? 's' : ''} · ${Math.round(t.cal)} kcal full recipe`;
+      $('d-protein').textContent  = fmt1(proteinPS);
+      $('d-carbs').textContent    = fmt1(carbsPS);
+      $('d-fat').textContent      = fmt1(fatPS);
+      $('d-prot-pct').textContent = protPct.toFixed(1) + '%';
+      $('d-carb-pct').textContent = carbPct.toFixed(1) + '%';
+      $('d-fat-pct').textContent  = fatPct.toFixed(1)  + '%';
+      $('d-prot-bar').style.width = protPct + '%';
+      $('d-carb-bar').style.width = carbPct + '%';
+      $('d-fat-bar').style.width  = fatPct  + '%';
+
+      // Donut ring
+      renderDonutRing([
+        { id: 'd-ring-fat',  pct: fatPct  / 100, color: '#f97316' },
+        { id: 'd-ring-carb', pct: carbPct / 100, color: '#facc15' },
+        { id: 'd-ring-prot', pct: protPct / 100, color: '#4ade80' },
+      ]);
+
+      updateExport(t, totalServings);
+    }
+
+    // ── EXPORT SNIPPET ───────────────────────────────────────────
+    function updateExport(t, totalServings) {
+      const bs = getBatchServings();
+      if (bs) totalServings = Math.round(bs.servingCount);
+      const name    = txt('r-name')   || 'My Recipe';
+      const emoji   = txt('r-emoji')  || '🍽️';
+      const desc    = txt('r-desc')   || `${ingredients.length} ingredients`;
+      const tags    = [...document.querySelectorAll('.tag-check:checked')].map(c => `"${c.value}"`);
+      const slug    = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+
+      const calPS     = t.cal     / totalServings;
+      const proteinPS = t.protein / totalServings;
+      const carbsPS   = t.carbs   / totalServings;
+      const fatPS     = t.fat     / totalServings;
+
+      const totalCalMacros = proteinPS * 4 + carbsPS * 4 + fatPS * 9;
+      const protPct = totalCalMacros ? +(proteinPS * 4 / totalCalMacros * 100).toFixed(1) : 0;
+      const carbPct = totalCalMacros ? +(carbsPS   * 4 / totalCalMacros * 100).toFixed(1) : 0;
+      const fatPct  = totalCalMacros ? +(fatPS     * 9 / totalCalMacros * 100).toFixed(1) : 0;
+
+      const snippet =
+`{
+  file:        "${slug}.html",
+  name:        "${name}",
+  description: "${desc}",
+  emoji:       "${emoji}",
+  thumbBg:     "linear-gradient(135deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)",
+  tags:        [${tags.join(', ') || '"High Protein"'}],
+  servings:    ${totalServings},
+  perServing: {
+    calories: ${Math.round(calPS)},
+    protein:  ${fmt1(proteinPS)},
+    carbs:    ${fmt1(carbsPS)},
+    fat:      ${fmt1(fatPS)},
+  },
+  macroSplit: {
+    protein: ${protPct},
+    carbs:   ${carbPct},
+    fat:     ${fatPct},
+  },
+},`;
+
+      $('export-code').textContent = snippet;
+    }
+
+    // ── COPY BUTTON ──────────────────────────────────────────────
+    $('copy-btn').addEventListener('click', () => {
+      const code = $('export-code').textContent;
+      if (code === '—') return;
+      navigator.clipboard.writeText(code).then(() => {
+        $('copy-btn').textContent = '✓ Copied!';
+        $('copy-btn').classList.add('copied');
+        setTimeout(() => {
+          $('copy-btn').textContent = 'Copy Snippet';
+          $('copy-btn').classList.remove('copied');
+        }, 2000);
+      });
+    });
+
+    // ── RECIPE META CHANGES → REFRESH EXPORT ────────────────────
+    ['r-name','r-emoji','r-desc'].forEach(id => {
+      $(id).addEventListener('input', () => {
+        if (ingredients.length) {
+          updateExport(totals(), parseInt($('r-servings-setup').value) || 1);
+        }
+      });
+    });
+    document.querySelectorAll('.tag-check').forEach(cb => {
+      cb.addEventListener('change', () => {
+        if (ingredients.length) {
+          updateExport(totals(), parseInt($('r-servings-setup').value) || 1);
+        }
+      });
+    });
+
+    // ════════════════════════════════════════════════════════════
+    // BATCH WEIGHING
+    // ════════════════════════════════════════════════════════════
+    let batchMethod = 'weight'; // 'weight' | 'count'
+
+    // Method toggle
+    document.querySelectorAll('.bm-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bm-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        batchMethod = btn.dataset.method;
+        $('batch-by-weight').style.display = batchMethod === 'weight' ? 'block' : 'none';
+        $('batch-by-count').style.display  = batchMethod === 'count'  ? 'block' : 'none';
+        updateBatch();
+      });
+    });
+
+    ['batch-total-weight', 'batch-serving-weight', 'batch-serving-count']
+      .forEach(id => $(id).addEventListener('input', updateBatch));
+
+    function getRawGrams() {
+      return ingredients.reduce((sum, ing) => sum + ing.grams, 0);
+    }
+
+    function getBatchServings() {
+      const batchWeight = parseFloat($('batch-total-weight').value) || 0;
+      if (!batchWeight) return null;
+      if (batchMethod === 'weight') {
+        const sw = parseFloat($('batch-serving-weight').value) || 0;
+        if (!sw) return null;
+        return { batchWeight, servingWeight: sw, servingCount: batchWeight / sw };
+      } else {
+        const sc = parseFloat($('batch-serving-count').value) || 0;
+        if (!sc) return null;
+        return { batchWeight, servingCount: sc, servingWeight: batchWeight / sc };
+      }
+    }
+
+    function generateSuggestions() {
+      const batchWeight = parseFloat($('batch-total-weight').value) || 0;
+      const suggestEl   = $('batch-suggestions');
+
+      if (!batchWeight || !ingredients.length) {
+        suggestEl.style.display = 'none';
+        return;
+      }
+
+      // Candidate counts → filter to realistic serving weights (40–500g)
+      const candidates = [2,3,4,5,6,7,8,9,10,12,14,15,16,18,20,24]
+        .map(count => ({ count, weight: batchWeight / count }))
+        .filter(s => s.weight >= 40 && s.weight <= 500);
+
+      if (!candidates.length) { suggestEl.style.display = 'none'; return; }
+
+      // Pick 3 spread across the range: largest portion, middle, smallest portion
+      let picks;
+      if (candidates.length <= 3) {
+        picks = candidates;
+      } else {
+        picks = [
+          candidates[0],
+          candidates[Math.floor((candidates.length - 1) / 2)],
+          candidates[candidates.length - 1],
+        ];
+      }
+
+      // Per-serving protein for each pick
+      const t = totals();
+
+      // Profile target: daily protein ÷ 4 meals
+      let targetProteinPerMeal = null;
+      const prof = getLocalProfile();
+      if (prof && prof.targets && prof.targets.protein) {
+        targetProteinPerMeal = prof.targets.protein / 4;
+      }
+
+      // Find best match index
+      let bestIdx = null;
+      if (targetProteinPerMeal) {
+        let minDiff = Infinity;
+        picks.forEach((p, i) => {
+          const diff = Math.abs((t.protein / p.count) - targetProteinPerMeal);
+          if (diff < minDiff) { minDiff = diff; bestIdx = i; }
+        });
+      }
+
+      // Render cards
+      suggestEl.style.display = 'block';
+      const grid = $('suggestion-grid');
+      grid.innerHTML = '';
+
+      picks.forEach((pick, idx) => {
+        const proteinPS = t.protein > 0 ? (t.protein / pick.count).toFixed(1) : null;
+        const isRecommended = idx === bestIdx;
+        const card = document.createElement('div');
+        card.className = 'suggestion-card' + (isRecommended ? ' recommended' : '');
+        card.innerHTML = `
+          ${isRecommended ? '<div class="sc-badge">Best for goals</div>' : ''}
+          <div class="sc-count">${pick.count}</div>
+          <div class="sc-weight">~${Math.round(pick.weight)}g each</div>
+          ${proteinPS ? `<div class="sc-protein">${proteinPS}g protein</div>` : ''}
+        `;
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.suggestion-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          // Switch to count method and apply
+          document.querySelectorAll('.bm-btn').forEach(b => b.classList.remove('active'));
+          document.querySelector('.bm-btn[data-method="count"]').classList.add('active');
+          batchMethod = 'count';
+          $('batch-by-weight').style.display = 'none';
+          $('batch-by-count').style.display  = 'block';
+          $('batch-serving-count').value = pick.count;
+          updateBatch();
+        });
+        grid.appendChild(card);
+      });
+    }
+
+    function updateBatch() {
+      const rawG = getRawGrams();
+      const batchWeight = parseFloat($('batch-total-weight').value) || 0;
+
+      // Show raw total if ingredients exist
+      if (rawG > 0) {
+        $('batch-raw-display').style.display = 'block';
+        $('batch-raw-val').textContent = rawG + 'g';
+      } else {
+        $('batch-raw-display').style.display = 'none';
+      }
+
+      generateSuggestions();
+
+      const bs = getBatchServings();
+      if (!bs) {
+        $('batch-result').style.display = 'none';
+        updateDashboard();
+        return;
+      }
+
+      // Show result
+      $('batch-result').style.display = 'block';
+      $('br-servings-val').textContent = Math.round(bs.servingCount * 10) / 10;
+      $('br-weight-val').textContent   = Math.round(bs.servingWeight * 10) / 10;
+
+      // Cooking yield
+      if (rawG > 0 && bs.batchWeight > 0) {
+        const yield_pct = (bs.batchWeight / rawG * 100).toFixed(1);
+        const lost      = rawG - bs.batchWeight;
+        $('br-yield-row').style.display = 'block';
+        if (lost > 0) {
+          $('br-yield-txt').textContent =
+            `Cooking yield: ${yield_pct}% · lost ${Math.round(lost)}g during cooking`;
+        } else {
+          $('br-yield-txt').textContent = `Cooking yield: ${yield_pct}%`;
+        }
+      } else {
+        $('br-yield-row').style.display = 'none';
+      }
+
+      // Sync servings setup field so dashboard reflects batch servings
+      $('r-servings-setup').value = Math.round(bs.servingCount);
+      servingsDisplay = Math.min(servingsDisplay, Math.round(bs.servingCount));
+      $('serv-display').textContent = servingsDisplay;
+
+      updateDashboard();
+    }
+
+    // ── MAIN RENDER ──────────────────────────────────────────────
+    function render() {
+      renderTable();
+      updateBatch();
+      // updateDashboard is called by updateBatch
+    }
+
+    // ════════════════════════════════════════════════════════════
+    // TAB SWITCHING
+    // ════════════════════════════════════════════════════════════
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        $('tab-builder').style.display = tab === 'builder' ? 'grid' : 'none';
+        $('tab-reverse').style.display = tab === 'reverse' ? 'grid' : 'none';
+      });
+    });
+
+    // ════════════════════════════════════════════════════════════
+    // REVERSE ENGINEER
+    // ════════════════════════════════════════════════════════════
+    let reIngredients = [];
+
+    const reNum  = id => parseFloat($(id).value) || 0;
+    const reTxt  = id => $(id).value.trim();
+    const reFmt1 = v  => v.toFixed(1);
+
+    // ── TARGETS ──────────────────────────────────────────────────
+    function reTargets() {
+      const p = reNum('re-t-protein');
+      const c = reNum('re-t-carbs');
+      const f = reNum('re-t-fat');
+      return { protein: p, carbs: c, fat: f, cal: p * 4 + c * 4 + f * 9 };
+    }
+
+    ['re-t-protein','re-t-carbs','re-t-fat'].forEach(id => {
+      $(id).addEventListener('input', () => {
+        const t = reTargets();
+        $('re-t-cal-display').textContent = t.cal ? Math.round(t.cal) : '—';
+        reUpdateSolveHints();
+        reUpdateDashboard();
+      });
+    });
+
+    // ── REMAINING BUDGET ─────────────────────────────────────────
+    function reAchieved() {
+      return reIngredients.reduce((acc, ing) => {
+        acc.cal     += (ing.grams / 100) * ing.kcal100;
+        acc.protein += (ing.grams / 100) * ing.protein100;
+        acc.carbs   += (ing.grams / 100) * ing.carbs100;
+        acc.fat     += (ing.grams / 100) * ing.fat100;
+        return acc;
+      }, { cal: 0, protein: 0, carbs: 0, fat: 0 });
+    }
+
+    function reRemaining() {
+      const t = reTargets();
+      const a = reAchieved();
+      return {
+        protein: t.protein - a.protein,
+        carbs:   t.carbs   - a.carbs,
+        fat:     t.fat     - a.fat,
+        cal:     t.cal     - a.cal,
+      };
+    }
+
+    // ── SOLVE HINTS ──────────────────────────────────────────────
+    function reUpdateSolveHints() {
+      const rem       = reRemaining();
+      const p100      = reNum('re-i-protein');
+      const c100      = reNum('re-i-carbs');
+      const f100      = reNum('re-i-fat');
+      const kcal100   = reNum('re-i-kcal');
+      const hasValues = p100 || c100 || f100;
+
+      const hint = $('re-solve-hint');
+
+      if (!hasValues) { hint.style.display = 'none'; return; }
+      hint.style.display = 'block';
+
+      function solveGrams(remaining, per100) {
+        if (!per100 || remaining <= 0) return null;
+        return (remaining / per100) * 100;
+      }
+
+      function showSolveRow(macro, per100, remaining, rowId, txtId) {
+        const g = solveGrams(remaining, per100);
+        const row = $(rowId);
+        if (g !== null && g > 0.5) {
+          const contribution = {
+            cal:     (g / 100) * kcal100,
+            protein: (g / 100) * p100,
+            carbs:   (g / 100) * c100,
+            fat:     (g / 100) * f100,
+          };
+          $(txtId).textContent =
+            `Solve for ${macro}: ${Math.round(g)}g → `
+            + `${Math.round(contribution.cal)}kcal · `
+            + `${reFmt1(contribution.protein)}P · `
+            + `${reFmt1(contribution.carbs)}C · `
+            + `${reFmt1(contribution.fat)}F`;
+          row.style.display = 'flex';
+          row.querySelector('.solve-apply').dataset.grams = Math.round(g);
+        } else {
+          row.style.display = 'none';
+        }
+      }
+
+      showSolveRow('Protein', p100, rem.protein, 're-solve-protein-row', 're-solve-protein-txt');
+      showSolveRow('Carbs',   c100, rem.carbs,   're-solve-carbs-row',   're-solve-carbs-txt');
+      showSolveRow('Fat',     f100, rem.fat,      're-solve-fat-row',     're-solve-fat-txt');
+
+      // Live preview for current grams value
+      const currentGrams = reNum('re-i-grams');
+      const preview = $('re-solve-preview');
+      if (currentGrams > 0) {
+        const contrib = {
+          cal:     (currentGrams / 100) * kcal100,
+          protein: (currentGrams / 100) * p100,
+          carbs:   (currentGrams / 100) * c100,
+          fat:     (currentGrams / 100) * f100,
+        };
+        $('re-preview-txt').textContent =
+          `${Math.round(contrib.cal)}kcal · `
+          + `${reFmt1(contrib.protein)}g P · `
+          + `${reFmt1(contrib.carbs)}g C · `
+          + `${reFmt1(contrib.fat)}g F`;
+        preview.style.display = 'block';
+      } else {
+        preview.style.display = 'none';
+      }
+    }
+
+    // Wire solve hint inputs
+    ['re-i-kcal','re-i-protein','re-i-carbs','re-i-fat','re-i-grams'].forEach(id => {
+      $(id).addEventListener('input', reUpdateSolveHints);
+    });
+
+    // "Use →" buttons apply the solved grams
+    $('re-solve-hint').addEventListener('click', e => {
+      const btn = e.target.closest('.solve-apply');
+      if (!btn) return;
+      $(  're-i-grams').value = btn.dataset.grams;
+      reUpdateSolveHints();
+    });
+
+    // ── ADD INGREDIENT ───────────────────────────────────────────
+    $('re-add-btn').addEventListener('click', () => {
+      const name  = reTxt('re-i-name');
+      const grams = reNum('re-i-grams');
+      const kcal  = reNum('re-i-kcal');
+
+      if (!name || !grams || !kcal) {
+        ['re-i-name','re-i-grams','re-i-kcal'].forEach(id => {
+          if (!$(id).value.trim() || ($(id).type === 'number' && !reNum(id))) {
+            $(id).style.borderColor = '#f87171';
+            setTimeout(() => $(id).style.borderColor = '', 1200);
+          }
+        });
+        return;
+      }
+
+      reIngredients.push({
+        id:        Date.now(),
+        name,
+        grams,
+        source:    reTxt('re-i-source'),
+        kcal100:   kcal,
+        protein100: reNum('re-i-protein'),
+        carbs100:   reNum('re-i-carbs'),
+        fat100:     reNum('re-i-fat'),
+      });
+
+      ['re-i-name','re-i-grams','re-i-source','re-i-kcal','re-i-protein','re-i-carbs','re-i-fat']
+        .forEach(id => $(id).value = '');
+
+      reRender();
+      $('re-i-name').focus();
+    });
+
+    ['re-i-name','re-i-grams','re-i-kcal','re-i-protein','re-i-carbs','re-i-fat'].forEach(id => {
+      $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('re-add-btn').click(); });
+    });
+
+    // ── DELETE ───────────────────────────────────────────────────
+    $('re-tbody').addEventListener('click', e => {
+      const btn = e.target.closest('.del-btn');
+      if (!btn) return;
+      reIngredients = reIngredients.filter(i => i.id !== parseInt(btn.dataset.id, 10));
+      reRender();
+    });
+
+    // ── RENDER TABLE ─────────────────────────────────────────────
+    function reRenderTable() {
+      if (!reIngredients.length) {
+        $('re-ing-empty').style.display = 'block';
+        $('re-table-wrap').style.display = 'none';
+        return;
+      }
+      $('re-ing-empty').style.display = 'none';
+      $('re-table-wrap').style.display = 'block';
+
+      const tbody = $('re-tbody');
+      tbody.innerHTML = '';
+      reIngredients.forEach(ing => {
+        const cal     = (ing.grams / 100) * ing.kcal100;
+        const protein = (ing.grams / 100) * ing.protein100;
+        const carbs   = (ing.grams / 100) * ing.carbs100;
+        const fat     = (ing.grams / 100) * ing.fat100;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${ing.name}<span class="gram-sub">${ing.grams}g raw${ing.source ? ' · ' + ing.source : ''}</span></td>
+          <td>${Math.round(cal)}</td>
+          <td>${reFmt1(protein)}g</td>
+          <td>${reFmt1(carbs)}g</td>
+          <td>${reFmt1(fat)}g</td>
+          <td><button class="del-btn" data-id="${ing.id}" title="Remove">×</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const a = reAchieved();
+      $('re-tot-cal').textContent     = Math.round(a.cal);
+      $('re-tot-protein').textContent = reFmt1(a.protein) + 'g';
+      $('re-tot-carbs').textContent   = reFmt1(a.carbs)   + 'g';
+      $('re-tot-fat').textContent     = reFmt1(a.fat)     + 'g';
+    }
+
+    // ── RENDER DASHBOARD ─────────────────────────────────────────
+    function reUpdateDashboard() {
+      const t   = reTargets();
+      const a   = reAchieved();
+      const rem = reRemaining();
+      const hasTargets = t.protein || t.carbs || t.fat;
+      const hasIngredients = reIngredients.length > 0;
+
+      if (!hasTargets && !hasIngredients) {
+        $('re-dash-empty').style.display = 'block';
+        $('re-dash-content').style.display = 'none';
+        return;
+      }
+      $('re-dash-empty').style.display = 'none';
+      $('re-dash-content').style.display = 'block';
+
+      $('re-d-cal').textContent    = Math.round(a.cal);
+      $('re-d-cal-sub').textContent = `of ${t.cal ? Math.round(t.cal) : '—'} kcal target`;
+
+      function setBar(barId, numsId, achieved, target, color) {
+        const pct = target ? Math.min((achieved / target) * 100, 100) : 0;
+        const bar = $(barId);
+        bar.style.width = pct + '%';
+        bar.style.background = achieved > target * 1.05 ? '#f87171' : color;
+        $(numsId).textContent = `${reFmt1(achieved)} / ${target ? target + 'g' : '—'}`;
+      }
+
+      setBar('re-d-protein-bar', 're-d-protein-nums', a.protein, t.protein, 'var(--protein)');
+      setBar('re-d-carbs-bar',   're-d-carbs-nums',   a.carbs,   t.carbs,   'var(--carbs)');
+      setBar('re-d-fat-bar',     're-d-fat-nums',     a.fat,     t.fat,     'var(--fat)');
+
+      // Remaining summary cards
+      function setRem(valId, lblId, remaining) {
+        const el = $(valId);
+        const lbl = $(lblId);
+        if (!hasIngredients) { el.textContent = '—'; lbl.textContent = 'remaining'; lbl.style.color = 'var(--muted2)'; return; }
+        const abs = Math.abs(remaining);
+        el.textContent = reFmt1(abs) + 'g';
+        if (remaining > 0.5) {
+          lbl.textContent = 'remaining';
+          lbl.style.color = 'var(--muted)';
+        } else if (remaining < -0.5) {
+          lbl.textContent = 'over target';
+          lbl.style.color = '#f87171';
+        } else {
+          lbl.textContent = 'on target ✓';
+          lbl.style.color = '#4ade80';
+        }
+      }
+      setRem('re-rem-protein', 're-rem-protein-lbl', rem.protein);
+      setRem('re-rem-carbs',   're-rem-carbs-lbl',   rem.carbs);
+      setRem('re-rem-fat',     're-rem-fat-lbl',      rem.fat);
+
+      // Status badge
+      const badge = $('re-status-badge');
+      if (!hasIngredients) {
+        badge.className = 'status-badge status-empty';
+        badge.textContent = 'Add ingredients';
+      } else {
+        const allClose = [rem.protein, rem.carbs, rem.fat].every(r => Math.abs(r) <= 2);
+        const anyOver  = [rem.protein, rem.carbs, rem.fat].some(r => r < -2);
+        if (allClose) {
+          badge.className = 'status-badge status-ok';
+          badge.textContent = '✓ On Target';
+        } else if (anyOver) {
+          badge.className = 'status-badge status-over';
+          badge.textContent = 'Over on a macro';
+        } else {
+          badge.className = 'status-badge status-under';
+          badge.textContent = 'Budget remaining';
+        }
+      }
+    }
+
+    // ── LOAD FROM PROFILE ────────────────────────────────────────
+    function applyProfileToRE(p) {
+      if (!p || !p.targets) return;
+      const btn = $('re-load-profile');
+      btn.style.display = 'inline-block';
+      btn.onclick = () => {
+        $('re-t-protein').value = p.targets.protein;
+        $('re-t-carbs').value   = p.targets.carbs;
+        $('re-t-fat').value     = p.targets.fat;
+        $('re-t-cal-display').textContent = p.targets.calories.toLocaleString();
+        reUpdateSolveHints();
+        reUpdateDashboard();
+      };
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      renderAuthNav(user);
+      let profile = null;
+      if (user) {
+        profile = await loadProfileFromCloud();
+        if (profile) saveLocalProfile(profile);
+      }
+      if (!profile) profile = getLocalProfile();
+      applyProfileToRE(profile);
+    });
+
+    // ── MAIN RE RENDER ───────────────────────────────────────────
+    function reRender() {
+      reRenderTable();
+      reUpdateDashboard();
+      reUpdateSolveHints();
+    }
+  </script>
+
+</body>
+</html>

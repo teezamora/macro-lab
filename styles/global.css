@@ -1,5 +1,5 @@
 /* ============================================================
-   MACRO LAB — Global Styles
+   LATTITUDE — Global Styles
    Shared across index.html and all recipe pages
    ============================================================ */
 
@@ -369,10 +369,40 @@ body::before {
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+/* ============================================================
+   AUTH NAV
+   ============================================================ */
+.auth-signin {
+  background: var(--surface2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 6px;
+  font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 1px; padding: 8px 14px; cursor: pointer;
+  transition: all 0.15s; text-transform: uppercase; white-space: nowrap;
+}
+.auth-signin:hover { border-color: var(--accent); color: var(--accent); }
+
+.auth-user { display: flex; align-items: center; gap: 8px; }
+.auth-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid var(--border); object-fit: cover;
+}
+.auth-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.auth-signout {
+  background: none; border: none; color: var(--muted);
+  font-size: 10px; font-family: 'DM Mono', monospace;
+  cursor: pointer; padding: 0; transition: color 0.15s;
+  text-transform: uppercase; letter-spacing: 0.8px;
+}
+.auth-signout:hover { color: #f87171; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 640px) {
   .nav, .recipe-nav { padding: 16px 20px; }
   .macro-hero { grid-template-columns: 1fr; }
   .secondary-grid { grid-template-columns: repeat(2,1fr); }
   .recipe-page-wrap { padding: 24px 20px 60px; }
   .cal-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .auth-name { display: none; }
 }

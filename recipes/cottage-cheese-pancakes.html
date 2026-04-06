@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cottage Cheese Pancakes — MACRO LAB</title>
+  <title>Cottage Cheese Pancakes — LATTITUDE</title>
   <link rel="stylesheet" href="../styles/global.css">
   <style>
     /* Recipe-nav is slightly different from home nav */
@@ -30,7 +30,10 @@
     <a href="../index.html" class="back-btn">
       <span class="back-arrow">←</span> All Recipes
     </a>
-    <a href="../index.html" class="nav-logo" style="font-size:18px">MACRO<span>LAB</span></a>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div id="auth-nav"></div>
+      <a href="../index.html" class="nav-logo" style="font-size:18px">LATT<span>ITUDE</span></a>
+    </div>
   </nav>
 
   <div class="recipe-page-wrap">
@@ -222,7 +225,14 @@
 
   </div><!-- end .recipe-page-wrap -->
 
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-init.js"></script>
   <script src="../js/nav.js"></script>
+  <script>
+    auth.onAuthStateChanged(user => renderAuthNav(user));
+  </script>
   <script>
     // ── RECIPE DATA ──────────────────────────────────────────
     const FULL = {

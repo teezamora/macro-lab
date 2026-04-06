@@ -1,5 +1,5 @@
 /* ============================================================
-   MACRO LAB — recipes.js
+   LATTITUDE — recipes.js
    THE ONLY FILE YOU EDIT WHEN ADDING A NEW RECIPE.
 
    To add a recipe:
@@ -30,49 +30,8 @@ const RECIPES = [
     },
   },
 
-  {
-    file:        "high-protein-breakfast-burritos.html",
-    name:        "Breakfast Burritos",
-    description: "Egg, sausage & cheddar wrap · 8 ingredients",
-    emoji:       "🌯",
-    thumbBg:     "linear-gradient(135deg, #1a0800 0%, #2d1200 50%, #1a0800 100%)",
-    tags:        ["Breakfast", "High Protein", "Meal Prep"],
-    servings:    6,
-    perServing: {
-      calories: 568,
-      protein:  35.0,
-      carbs:    35.0,
-      fat:      28.0,
-    },
-    macroSplit: {
-      protein: 26.3,
-      carbs:   26.3,
-      fat:     47.4,
-    },
-  },
 
-  {
-    file:        "honey-garlic-chicken.html",
-    name:        "Honey Garlic Chicken",
-    description: "Instant Pot chicken & tofu · honey soy glaze · 9 ingredients",
-    emoji:       "🍗",
-    thumbBg:     "linear-gradient(135deg, #1a0f00 0%, #2d1a00 50%, #1a0f00 100%)",
-    tags:        ["Dinner", "High Protein", "Meal Prep"],
-    servings:    5,
-    perServing: {
-      calories: 424,
-      protein:  40.3,
-      carbs:    37.0,
-      fat:      13.1,
-    },
-    macroSplit: {
-      protein: 37.7,
-      carbs:   34.6,
-      fat:     27.7,
-    },
-  },
-
-  // ── PASTE NEW RECIPES BELOW THIS LINE ─────────────────────
+// ── PASTE NEW RECIPES BELOW THIS LINE ─────────────────────
   // {
   //   file:        "chicken-rice-bowl.html",
   //   name:        "Chicken Rice Bowl",
