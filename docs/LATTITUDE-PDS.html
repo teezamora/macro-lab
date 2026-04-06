@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LATTITUDE — Product Design Specification</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    :root {
+      --accent:   #b8cc00;
+      --text:     #1a1a1a;
+      --muted:    #6b7280;
+      --border:   #e5e7eb;
+      --surface:  #f9fafb;
+      --surface2: #f3f4f6;
+      --green:    #16a34a;
+      --blue:     #2563eb;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px; line-height: 1.7;
+      color: var(--text); background: #fff;
+      max-width: 900px; margin: 0 auto;
+      padding: 60px 60px 80px;
+    }
+
+    .doc-header {
+      border-bottom: 3px solid var(--text);
+      padding-bottom: 24px; margin-bottom: 36px;
+    }
+    .doc-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .doc-title { font-size: 36px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 6px; }
+    .doc-title span { color: var(--accent); }
+    .doc-subtitle { font-size: 16px; color: var(--muted); font-weight: 400; margin-bottom: 20px; }
+    .doc-meta { display: flex; gap: 24px; flex-wrap: wrap; }
+    .doc-meta-item { font-size: 12px; color: var(--muted); }
+    .doc-meta-item strong { color: var(--text); }
+
+    .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px 28px; margin-bottom: 48px; }
+    .toc-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 14px; }
+    .toc ol { padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+    .toc a { color: var(--text); text-decoration: none; font-size: 13px; }
+    .toc a:hover { color: var(--accent); }
+    .toc .toc-sub { padding-left: 16px; margin-top: 4px; list-style: disc; }
+    .toc .toc-sub li { margin-bottom: 2px; }
+    .toc .toc-sub a { color: var(--muted); font-size: 12px; }
+
+    section { margin-bottom: 52px; }
+    h2 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; border-bottom: 2px solid var(--border); padding-bottom: 10px; margin-bottom: 20px; }
+    h2 .section-num { color: var(--muted); font-weight: 400; margin-right: 8px; font-size: 18px; }
+    h3 { font-size: 16px; font-weight: 600; margin: 24px 0 10px; }
+    h4 { font-size: 11px; font-weight: 600; margin: 16px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    p  { margin-bottom: 12px; }
+
+    table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: 13px; }
+    th { background: var(--surface2); text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); border: 1px solid var(--border); }
+    td { padding: 10px 14px; border: 1px solid var(--border); vertical-align: top; }
+    tr:nth-child(even) td { background: var(--surface); }
+
+    code {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 5px;
+    }
+    pre {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      background: #1a1a2e; color: #e2e8f0;
+      border-radius: 8px; padding: 18px 20px;
+      overflow-x: auto; margin: 12px 0 20px;
+      line-height: 1.6;
+    }
+    pre .c  { color: #6b7280; }
+    pre .k  { color: #93c5fd; }
+    pre .s  { color: #86efac; }
+    pre .n  { color: #fca5a5; }
+
+    .callout { border-left: 4px solid var(--accent); background: var(--surface); border-radius: 0 6px 6px 0; padding: 14px 18px; margin: 16px 0; font-size: 13px; line-height: 1.6; }
+    .callout strong { display: block; margin-bottom: 4px; }
+
+    /* Color swatches */
+    .color-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 16px 0 24px; }
+    .swatch { border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+    .swatch-color { height: 56px; }
+    .swatch-info { padding: 8px 10px; background: white; }
+    .swatch-name { font-size: 11px; font-weight: 600; }
+    .swatch-hex  { font-size: 10px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+    .swatch-role { font-size: 10px; color: var(--muted); }
+
+    /* Font samples */
+    .font-sample { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; }
+    .font-sample-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+
+    /* Flow steps */
+    .flow { display: flex; flex-direction: column; gap: 0; margin: 16px 0 24px; }
+    .flow-step { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .flow-step:last-child { border-bottom: none; }
+    .flow-num { width: 24px; height: 24px; border-radius: 50%; background: var(--text); color: white; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .flow-body { flex: 1; }
+    .flow-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
+    .flow-desc  { font-size: 12px; color: var(--muted); }
+
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { margin-bottom: 4px; font-size: 13px; }
+
+    .badge { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px; }
+    .badge-done    { background: #dcfce7; color: var(--green); }
+    .badge-planned { background: #dbeafe; color: var(--blue); }
+
+    @media print {
+      body { padding: 40px; font-size: 12px; }
+      .toc, .font-sample, .feature-block, .flow { break-inside: avoid; }
+      h2 { break-after: avoid; }
+      pre { background: #f3f4f6; color: #1a1a1a; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="doc-header">
+    <div class="doc-label">Product Documentation</div>
+    <div class="doc-title">LATT<span>ITUDE</span></div>
+    <div class="doc-subtitle">Product Design Specification (PDS)</div>
+    <div class="doc-meta">
+      <div class="doc-meta-item"><strong>Version:</strong> 1.0</div>
+      <div class="doc-meta-item"><strong>Date:</strong> April 2026</div>
+      <div class="doc-meta-item"><strong>Status:</strong> Active Development</div>
+      <div class="doc-meta-item"><strong>Owner:</strong> Tre Zamora</div>
+    </div>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Table of Contents</div>
+    <ol>
+      <li><a href="#s1">Design Philosophy</a></li>
+      <li><a href="#s2">Design System</a>
+        <ul class="toc-sub">
+          <li><a href="#colors">Color Palette</a></li>
+          <li><a href="#type">Typography</a></li>
+          <li><a href="#components">Core Components</a></li>
+        </ul>
+      </li>
+      <li><a href="#s3">Page Specifications</a>
+        <ul class="toc-sub">
+          <li><a href="#p-index">Dashboard (index.html)</a></li>
+          <li><a href="#p-builder">Recipe Builder (builder.html)</a></li>
+          <li><a href="#p-profile">Profile & Goals (profile.html)</a></li>
+          <li><a href="#p-recipe">Recipe Detail Pages</a></li>
+        </ul>
+      </li>
+      <li><a href="#s4">Data Architecture</a>
+        <ul class="toc-sub">
+          <li><a href="#d-profile">Profile Schema</a></li>
+          <li><a href="#d-recipe">Recipe Schema</a></li>
+          <li><a href="#d-firestore">Firestore Schema</a></li>
+        </ul>
+      </li>
+      <li><a href="#s5">User Flows</a></li>
+      <li><a href="#s6">File Structure</a></li>
+    </ol>
+  </div>
+
+  <!-- ════════════════ S1 -->
+  <section id="s1">
+    <h2><span class="section-num">1</span> Design Philosophy</h2>
+    <p>LATTITUDE's visual identity is built around a dark, high-contrast aesthetic that feels premium and athletic — closer to a sports performance dashboard than a wellness app. The design conveys precision, focus, and seriousness without being harsh or intimidating.</p>
+    <h3>Design Principles</h3>
+    <table>
+      <tr><th>Principle</th><th>Application</th></tr>
+      <tr><td><strong>Dark first</strong></td><td>Deep near-black backgrounds (<code>#0a0b0c</code>) reduce eye strain during long use and make macro numbers pop visually.</td></tr>
+      <tr><td><strong>Data is the hero</strong></td><td>Macro numbers are large, bold, and colorful. Chrome and decoration are minimal. Nothing competes with the numbers.</td></tr>
+      <tr><td><strong>Color carries meaning</strong></td><td>Protein is always green. Carbs are always yellow. Fat is always orange. Consistent across every chart, table, and card.</td></tr>
+      <tr><td><strong>Monospace for data</strong></td><td>All numbers, codes, and labels use DM Mono. Proportional fonts for prose and UI text.</td></tr>
+      <tr><td><strong>Micro-interactions</strong></td><td>Cards lift on hover. Pills animate active state. Inputs glow on focus. Nothing feels static.</td></tr>
+      <tr><td><strong>Progressive disclosure</strong></td><td>Simple surface with depth available. The dashboard is clean; the builder reveals detail when needed.</td></tr>
+    </table>
+  </section>
+
+  <!-- ════════════════ S2 -->
+  <section id="s2">
+    <h2><span class="section-num">2</span> Design System</h2>
+
+    <h3 id="colors">Color Palette</h3>
+    <p>Defined as CSS custom properties in <code>styles/global.css</code>. All pages import this file.</p>
+
+    <div class="color-grid">
+      <div class="swatch">
+        <div class="swatch-color" style="background:#0a0b0c"></div>
+        <div class="swatch-info"><div class="swatch-name">Background</div><div class="swatch-hex">--bg: #0a0b0c</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#131415"></div>
+        <div class="swatch-info"><div class="swatch-name">Surface</div><div class="swatch-hex">--surface: #131415</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#1a1b1d"></div>
+        <div class="swatch-info"><div class="swatch-name">Surface 2</div><div class="swatch-hex">--surface2: #1a1b1d</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#212224"></div>
+        <div class="swatch-info"><div class="swatch-name">Surface 3</div><div class="swatch-hex">--surface3: #212224</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#e8ff47"></div>
+        <div class="swatch-info"><div class="swatch-name">Accent</div><div class="swatch-hex">--accent: #e8ff47</div><div class="swatch-role">CTAs, highlights, logo</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#4ade80"></div>
+        <div class="swatch-info"><div class="swatch-name">Protein</div><div class="swatch-hex">--protein: #4ade80</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#facc15"></div>
+        <div class="swatch-info"><div class="swatch-name">Carbs</div><div class="swatch-hex">--carbs: #facc15</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#f97316"></div>
+        <div class="swatch-info"><div class="swatch-name">Fat</div><div class="swatch-hex">--fat: #f97316</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#38bdf8"></div>
+        <div class="swatch-info"><div class="swatch-name">Fiber</div><div class="swatch-hex">--fiber: #38bdf8</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#f0f0ee"></div>
+        <div class="swatch-info"><div class="swatch-name">Text</div><div class="swatch-hex">--text: #f0f0ee</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#6b6e73"></div>
+        <div class="swatch-info"><div class="swatch-name">Muted</div><div class="swatch-hex">--muted: #6b6e73</div></div>
+      </div>
+      <div class="swatch">
+        <div class="swatch-color" style="background:#252729"></div>
+        <div class="swatch-info"><div class="swatch-name">Border</div><div class="swatch-hex">--border: #252729</div></div>
+      </div>
+    </div>
+
+    <h3 id="type">Typography</h3>
+    <p>Three typefaces serve distinct roles. All loaded from Google Fonts.</p>
+
+    <div class="font-sample">
+      <div class="font-sample-label">Bebas Neue — Display / Numbers</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;letter-spacing:1px;color:#1a1a1a">LATTITUDE 185g</div>
+      <div style="margin-top:8px;font-size:12px;color:#6b7280">Used for: page titles, calorie numbers, macro values, recipe names, section headings, stat cards</div>
+    </div>
+    <div class="font-sample">
+      <div class="font-sample-label">DM Sans — Body / UI</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:16px;color:#1a1a1a">Track your nutrition, training, and full fitness journey.</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#6b7280;margin-top:4px">Light weight for descriptions and subtitles. Medium/SemiBold for labels and buttons.</div>
+      <div style="margin-top:8px;font-size:12px;color:#6b7280">Used for: body copy, ingredient names, descriptions, nav items, button labels</div>
+    </div>
+    <div class="font-sample">
+      <div class="font-sample-label">DM Mono — Data / Code</div>
+      <div style="font-family:'DM Mono',monospace;font-size:14px;color:#1a1a1a">5.6g · 100 kcal · 37.7% · USDA #0905062</div>
+      <div style="margin-top:8px;font-size:12px;color:#6b7280">Used for: macro values in tables, labels, tags, export code, eyebrow text, form field labels</div>
+    </div>
+
+    <h3 id="components">Core Components</h3>
+    <table>
+      <tr><th>Component</th><th>CSS Class(es)</th><th>Usage</th></tr>
+      <tr><td><strong>Nav</strong></td><td><code>.nav</code>, <code>.nav-logo</code></td><td>Sticky top nav. Logo: LATT in accent, ITUDE in muted. Backdrop blur on scroll.</td></tr>
+      <tr><td><strong>Button — Primary</strong></td><td><code>.btn-add</code></td><td>Accent background (#e8ff47), black text. Used for "Build Recipe", "Save", CTAs.</td></tr>
+      <tr><td><strong>Button — Secondary</strong></td><td><code>.btn-add</code> with inline override</td><td>Surface background, muted text, bordered. Used for "My Goals".</td></tr>
+      <tr><td><strong>Back Button</strong></td><td><code>.back-btn</code></td><td>Text link with ← arrow. Hover shifts arrow left. Appears on all sub-pages.</td></tr>
+      <tr><td><strong>Panel</strong></td><td><code>.panel</code></td><td>Surface background, 1px border, 14px radius. Standard container on builder and profile pages.</td></tr>
+      <tr><td><strong>Recipe Card</strong></td><td><code>.recipe-card</code></td><td>Lifts on hover (+4px Y, shadow). Emoji scales 110%. Arrow appears top-right. Links to recipe page.</td></tr>
+      <tr><td><strong>Macro Card</strong></td><td><code>.macro-card</code></td><td>3px colored top accent line. Bebas Neue value, % bar beneath.</td></tr>
+      <tr><td><strong>Calorie Card</strong></td><td><code>.cal-card</code></td><td>Full-width. Large Bebas number + radial glow behind. Donut ring chart on the right.</td></tr>
+      <tr><td><strong>Ingredient Table</strong></td><td><code>.ing-table</code></td><td>Separate border-spacing rows. Rounded left/right on first/last cell. Totals row has accent left border.</td></tr>
+      <tr><td><strong>Filter Pill</strong></td><td><code>.filter-pill</code></td><td>Tag filter buttons. Active state: accent fill. Used on dashboard.</td></tr>
+      <tr><td><strong>Form Input</strong></td><td><code>input[type="number/text"]</code></td><td>Surface2 background, border glows accent on focus. Placeholder in muted2.</td></tr>
+      <tr><td><strong>Noise Overlay</strong></td><td><code>body::before</code></td><td>SVG fractal noise at 3.5% opacity. Adds texture to backgrounds. Fixed, pointer-events: none.</td></tr>
+      <tr><td><strong>Auth Nav</strong></td><td><code>.auth-signin</code>, <code>.auth-user</code></td><td>"Sign in with Google" button or avatar + name + sign out. Rendered by <code>renderAuthNav()</code>.</td></tr>
+    </table>
+  </section>
+
+  <!-- ════════════════ S3 -->
+  <section id="s3">
+    <h2><span class="section-num">3</span> Page Specifications</h2>
+
+    <h3 id="p-index">Dashboard — <code>index.html</code></h3>
+    <table>
+      <tr><th>Zone</th><th>Description</th></tr>
+      <tr><td><strong>Nav</strong></td><td>Logo (left) · Auth nav + My Goals + Build Recipe (right). Sticky, backdrop blur.</td></tr>
+      <tr><td><strong>Hero</strong></td><td>Eyebrow label · "DEFINE YOUR LATTITUDE" title · Subtitle. Max-width 1100px, 60px top padding. FadeUp animation.</td></tr>
+      <tr><td><strong>Goals Bar</strong></td><td>If profile saved: prep phase badge + daily protein/carbs/fat/calories from Firestore/localStorage. If not: "Set Up Goals →" CTA. Replaces old averages stats bar.</td></tr>
+      <tr><td><strong>Filter Bar</strong></td><td>Auto-generated tag pills from recipe tags. "All" pill always first. Active pill filters recipe grid.</td></tr>
+      <tr><td><strong>Section Header</strong></td><td>"Your Recipes" heading + live recipe count (updates with filter).</td></tr>
+      <tr><td><strong>Recipe Grid</strong></td><td>CSS Grid, auto-fill, minmax(300px, 1fr). Cards animate in with staggered delay. Empty state if no matches.</td></tr>
+    </table>
+
+    <h3 id="p-builder">Recipe Builder — <code>builder.html</code></h3>
+    <p>Two-column layout (1fr + 380px sidebar) with a tab bar at the top switching between Builder and Reverse Engineer.</p>
+
+    <h4>Builder Tab</h4>
+    <table>
+      <tr><th>Panel</th><th>Description</th></tr>
+      <tr><td><strong>Recipe Setup</strong></td><td>Name, emoji, description, servings, tag checkboxes (multi-select pills).</td></tr>
+      <tr><td><strong>Add Ingredient</strong></td><td>Name, grams, USDA source, + per-100g: calories, protein, carbs, fat, fiber, sugar, sodium. Enter key triggers add.</td></tr>
+      <tr><td><strong>Ingredient Breakdown</strong></td><td>Table showing each ingredient's contribution. Totals row with accent left border. Delete button per row.</td></tr>
+      <tr><td><strong>Batch Weighing</strong></td><td>Raw total display · Finished batch weight input · 3 auto-suggested serving size cards (with "Best for goals" badge if profile saved) · Manual method toggle (by weight or count) · Cooking yield display.</td></tr>
+      <tr><td><strong>Sidebar — Serving Control</strong></td><td>−/+ buttons to preview 1 to N servings. Syncs with batch weighing result.</td></tr>
+      <tr><td><strong>Sidebar — Macro Dashboard</strong></td><td>Calorie card + donut ring · 3 macro cards (protein/carbs/fat) with % bars. Updates live.</td></tr>
+      <tr><td><strong>Sidebar — Export</strong></td><td>Generated <code>recipes.js</code> snippet. Copy button with ✓ confirmation.</td></tr>
+    </table>
+
+    <h4>Reverse Engineer Tab</h4>
+    <table>
+      <tr><th>Panel</th><th>Description</th></tr>
+      <tr><td><strong>Macro Targets</strong></td><td>Protein, carbs, fat inputs. Calories auto-calculated. "Load my daily goals" button if profile exists.</td></tr>
+      <tr><td><strong>Add Ingredient</strong></td><td>Same fields as builder. Solve hints auto-appear when per-100g values are filled: shows grams needed for each remaining macro + "Use →" button.</td></tr>
+      <tr><td><strong>Meal Plan</strong></td><td>Table of locked-in ingredients. Totals row shows achieved macros.</td></tr>
+      <tr><td><strong>Sidebar</strong></td><td>Progress bars for protein/carbs/fat (turns red if over). Remaining summary cards per macro. Status badge: On Target / Budget Remaining / Over on a macro.</td></tr>
+    </table>
+
+    <h3 id="p-profile">Profile & Goals — <code>profile.html</code></h3>
+    <table>
+      <tr><th>Zone</th><th>Description</th></tr>
+      <tr><td><strong>Unit Toggle</strong></td><td>Imperial (default) / Metric. Switching converts existing input values and swaps height fields (ft+in ↔ cm).</td></tr>
+      <tr><td><strong>Body Stats</strong></td><td>Weight, height, age. Two-field height input for imperial (ft + in).</td></tr>
+      <tr><td><strong>Activity Level</strong></td><td>5 radio option cards with descriptions and multiplier values. Default: Moderately Active (×1.55).</td></tr>
+      <tr><td><strong>Prep Phase</strong></td><td>4 phase cards: Maintenance / Bulk / Cut / Peak Week. Default: Cut. Each shows calorie adjustment.</td></tr>
+      <tr><td><strong>Save Button</strong></td><td>Disabled until stats filled. Saves to localStorage + Firestore. Toast confirmation → redirects to dashboard.</td></tr>
+      <tr><td><strong>Sidebar — Results</strong></td><td>Live calculation: BMR → TDEE → target calories → protein/carbs/fat macro cards. Updates as user types. Phase badge displayed.</td></tr>
+    </table>
+    <p>On page load: <code>auth.onAuthStateChanged</code> fires → loads profile from Firestore (if signed in) then localStorage → pre-populates all form fields.</p>
+
+    <h3 id="p-recipe">Recipe Detail Pages — <code>recipes/*.html</code></h3>
+    <table>
+      <tr><th>Zone</th><th>Description</th></tr>
+      <tr><td><strong>Nav</strong></td><td>← All Recipes (back) · Auth nav · LATTITUDE logo</td></tr>
+      <tr><td><strong>Header</strong></td><td>Tag badge · Large Bebas title · Subtitle description</td></tr>
+      <tr><td><strong>Serving Bar</strong></td><td>−/+ scaler. All macro values scale linearly with serving count.</td></tr>
+      <tr><td><strong>Macro Hero</strong></td><td>Calorie card with donut ring + legend · Protein card · Carbs card · Fat card</td></tr>
+      <tr><td><strong>Secondary Stats</strong></td><td>4-column grid: Fiber · Sugar · Sodium · Cholesterol</td></tr>
+      <tr><td><strong>Ingredient Table</strong></td><td>Full breakdown per ingredient with USDA source reference. Totals row.</td></tr>
+      <tr><td><strong>Instructions</strong></td><td>Numbered steps list.</td></tr>
+      <tr><td><strong>Nutrition Facts Label</strong></td><td>FDA 2020 format on white background. Designed to be scannable by nutrition apps.</td></tr>
+      <tr><td><strong>Tip Box</strong></td><td>Men's Physique–specific coaching notes about the recipe.</td></tr>
+    </table>
+  </section>
+
+  <!-- ════════════════ S4 -->
+  <section id="s4">
+    <h2><span class="section-num">4</span> Data Architecture</h2>
+
+    <h3 id="d-profile">Profile Schema</h3>
+    <p>Stored in both <code>localStorage</code> (key: <code>lattitude_profile</code>) and Firestore (<code>users/{uid}/profile</code>).</p>
+    <pre><span class="c">// Profile object structure</span>
+{
+  <span class="n">units</span>:      <span class="s">"imperial"</span>,  <span class="c">// "imperial" | "metric"</span>
+  <span class="n">weightKg</span>:   <span class="s">83.9</span>,        <span class="c">// always stored in kg internally</span>
+  <span class="n">heightCm</span>:   <span class="s">180.3</span>,       <span class="c">// always stored in cm internally</span>
+  <span class="n">age</span>:        <span class="s">28</span>,
+  <span class="n">activity</span>:   <span class="s">1.55</span>,        <span class="c">// TDEE multiplier</span>
+  <span class="n">phaseAdj</span>:   <span class="s">-400</span>,        <span class="c">// kcal adjustment for prep phase</span>
+  <span class="n">phaseName</span>:  <span class="s">"cut"</span>,       <span class="c">// "maintenance" | "bulk" | "cut" | "peak"</span>
+  <span class="n">bmr</span>:        <span class="s">1950</span>,
+  <span class="n">tdee</span>:       <span class="s">3022</span>,
+  <span class="n">targets</span>: {
+    <span class="n">calories</span>: <span class="s">2622</span>,
+    <span class="n">protein</span>:  <span class="s">185</span>,
+    <span class="n">carbs</span>:    <span class="s">230</span>,
+    <span class="n">fat</span>:      <span class="s">65</span>
+  }
+}</pre>
+
+    <h3 id="d-recipe">Recipe Schema</h3>
+    <p>Defined in <code>recipes.js</code> as entries in the <code>RECIPES</code> array.</p>
+    <pre>{
+  <span class="n">file</span>:        <span class="s">"cottage-cheese-pancakes.html"</span>,
+  <span class="n">name</span>:        <span class="s">"Cottage Cheese Pancakes"</span>,
+  <span class="n">description</span>: <span class="s">"High-protein batter · 7 ingredients · 45g each"</span>,
+  <span class="n">emoji</span>:       <span class="s">"🥞"</span>,
+  <span class="n">thumbBg</span>:     <span class="s">"linear-gradient(135deg, #1a1500 0%, #2d2400 50%, #1a1500 100%)"</span>,
+  <span class="n">tags</span>:        [<span class="s">"Breakfast"</span>, <span class="s">"High Protein"</span>, <span class="s">"Post-Workout"</span>],
+  <span class="n">servings</span>:    <span class="s">17</span>,
+  <span class="n">perServing</span>: {
+    <span class="n">calories</span>: <span class="s">100</span>,
+    <span class="n">protein</span>:  <span class="s">5.6</span>,
+    <span class="n">carbs</span>:    <span class="s">8.9</span>,
+    <span class="n">fat</span>:      <span class="s">4.6</span>
+  },
+  <span class="n">macroSplit</span>: {  <span class="c">// % of calories — must total 100</span>
+    <span class="n">protein</span>: <span class="s">22.6</span>,
+    <span class="n">carbs</span>:   <span class="s">35.8</span>,
+    <span class="n">fat</span>:     <span class="s">41.6</span>
+  }
+}</pre>
+
+    <h3 id="d-firestore">Firestore Schema</h3>
+    <pre><span class="c">// Collection structure</span>
+users/
+  {uid}/
+    profile: { <span class="c">/* profile object above */</span> }
+    <span class="c">// future: recipes/{recipeId}, logs/{date}, workouts/{id}</span></pre>
+    <h4>Security Rules</h4>
+    <pre><span class="k">rules_version</span> = <span class="s">'2'</span>;
+<span class="k">service</span> cloud.firestore {
+  <span class="k">match</span> /databases/{database}/documents {
+    <span class="k">match</span> /users/{userId}/{document=**} {
+      <span class="k">allow</span> read, write: <span class="k">if</span> request.auth != null
+        && request.auth.uid == userId;
+    }
+  }
+}</pre>
+  </section>
+
+  <!-- ════════════════ S5 -->
+  <section id="s5">
+    <h2><span class="section-num">5</span> User Flows</h2>
+
+    <h3>Flow 1 — First-time Setup</h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><div class="flow-title">Land on Dashboard</div><div class="flow-desc">Goals bar shows "Set Up Goals →" CTA. Recipe grid shows saved recipes.</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><div class="flow-title">Click "Set Up Goals"</div><div class="flow-desc">Navigate to profile.html</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><div class="flow-title">Enter stats</div><div class="flow-desc">Weight, height, age. Right sidebar shows live BMR/TDEE calculation as user types.</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><div class="flow-title">Select activity level and prep phase</div><div class="flow-desc">Calorie target and macro targets update live. Protein/carbs/fat displayed in macro cards.</div></div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-body"><div class="flow-title">Sign in with Google + Save</div><div class="flow-desc">Profile saves to localStorage and Firestore. Toast confirmation. Redirect to dashboard.</div></div></div>
+      <div class="flow-step"><div class="flow-num">6</div><div class="flow-body"><div class="flow-title">Dashboard shows goals</div><div class="flow-desc">Goals bar now shows prep phase + daily protein/carbs/fat/calories.</div></div></div>
+    </div>
+
+    <h3>Flow 2 — Building a Recipe</h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><div class="flow-title">Click "+ Build Recipe"</div><div class="flow-desc">Navigate to builder.html, Builder tab active.</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><div class="flow-title">Fill in Recipe Setup</div><div class="flow-desc">Name, emoji, description, estimated servings, tags.</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><div class="flow-title">Add ingredients</div><div class="flow-desc">For each ingredient: enter name, raw gram weight, and per-100g macro values from USDA. Press Enter or click Add.</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><div class="flow-title">Watch live dashboard</div><div class="flow-desc">Sidebar macro dashboard updates after each ingredient. Donut ring and % bars update in real time.</div></div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-body"><div class="flow-title">Weigh finished batch</div><div class="flow-desc">After cooking, enter the total cooked weight. 3 serving suggestions appear. Click "Best for goals" or choose manually.</div></div></div>
+      <div class="flow-step"><div class="flow-num">6</div><div class="flow-body"><div class="flow-title">Copy export snippet</div><div class="flow-desc">Click "Copy Snippet" to get the recipes.js object. Paste into recipes.js and create matching HTML file.</div></div></div>
+    </div>
+
+    <h3>Flow 3 — Reverse Engineering a Meal</h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><div class="flow-title">Open builder.html → Reverse Engineer tab</div><div class="flow-desc"></div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><div class="flow-title">Set targets</div><div class="flow-desc">Enter desired protein, carbs, fat. Or click "Load my daily goals" to pull from saved profile (÷ 4 for per-meal).</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><div class="flow-title">Add first ingredient</div><div class="flow-desc">Enter per-100g values. Solve hints appear: "To hit remaining 40g protein: use 157g → click Use →"</div></div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-body"><div class="flow-title">Click "Use →"</div><div class="flow-desc">Gram field auto-fills. Click Add. Progress bars in sidebar update.</div></div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-body"><div class="flow-title">Add remaining ingredients</div><div class="flow-desc">Repeat with carb and fat sources. Sidebar shows remaining budget for each macro.</div></div></div>
+      <div class="flow-step"><div class="flow-num">6</div><div class="flow-body"><div class="flow-title">Status badge reads "On Target"</div><div class="flow-desc">All three macros within 2g of target. Meal plan is complete.</div></div></div>
+    </div>
+
+    <h3>Flow 4 — Using on a Second Device</h3>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-body"><div class="flow-title">Open LATTITUDE on phone/new device</div><div class="flow-desc">No profile locally. Goals bar shows "Set Up Goals" CTA.</div></div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-body"><div class="flow-title">Click "Sign in with Google"</div><div class="flow-desc">Google popup opens. User signs in with same account.</div></div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-body"><div class="flow-title">Profile loads from Firestore</div><div class="flow-desc">Goals bar immediately shows saved prep phase and macro targets. localStorage cache written for offline use.</div></div></div>
+    </div>
+  </section>
+
+  <!-- ════════════════ S6 -->
+  <section id="s6">
+    <h2><span class="section-num">6</span> File Structure</h2>
+    <pre>lattitude/
+├── index.html              <span class="c"># Dashboard — recipe grid + goals bar</span>
+├── builder.html            <span class="c"># Recipe Builder + Reverse Engineer + Batch Weighing</span>
+├── profile.html            <span class="c"># Profile setup + TDEE calculator</span>
+├── recipes.js              <span class="c"># Central recipe registry (ONLY file to edit for new recipes)</span>
+│
+├── recipes/                <span class="c"># Individual recipe detail pages</span>
+│   └── cottage-cheese-pancakes.html
+│
+├── styles/
+│   └── global.css          <span class="c"># Full design system — tokens, components, layout, auth UI</span>
+│
+├── js/
+│   ├── firebase-init.js    <span class="c"># Firebase config + auth + Firestore helpers (shared)</span>
+│   └── nav.js              <span class="c"># Donut ring renderer + serving scaler utility</span>
+│
+└── docs/
+    ├── LATTITUDE-PRD.html  <span class="c"># Product Requirements Document</span>
+    └── LATTITUDE-PDS.html  <span class="c"># Product Design Specification (this file)</span></pre>
+
+    <h3>Adding a New Recipe</h3>
+    <ol>
+      <li>Build the recipe in <code>builder.html</code> or create <code>recipes/your-recipe-name.html</code> by duplicating an existing recipe page</li>
+      <li>Copy the export snippet from the builder and add it to the <code>RECIPES</code> array in <code>recipes.js</code></li>
+      <li>Push to GitHub — the recipe appears on the dashboard automatically</li>
+    </ol>
+    <div class="callout">
+      <strong>Single source of truth</strong>
+      <code>recipes.js</code> is the only file that drives the dashboard grid, filter pills, stats bar, and recipe count. The individual HTML files only handle the detail page. Never duplicate recipe metadata.
+    </div>
+  </section>
+
+</body>
+</html>
