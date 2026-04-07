@@ -629,11 +629,17 @@
           </div>
         </div>
 
-        <!-- EXPORT -->
+        <!-- SAVE / EXPORT -->
         <div class="panel export-panel">
-          <div class="panel-title" style="font-size:16px">Export to recipes.js</div>
-          <pre class="code-block" id="export-code">—</pre>
-          <button class="copy-btn" id="copy-btn">Copy Snippet</button>
+          <div class="panel-title" style="font-size:16px">Save Recipe</div>
+          <div id="save-signin-msg" style="text-align:center;padding:12px 0 4px;font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;display:none">SIGN IN TO SAVE TO CLOUD</div>
+          <button id="save-cloud-btn" class="btn-primary" style="margin-top:4px">↑ Save to Cloud</button>
+          <div id="save-feedback" style="font-size:10px;text-align:center;margin-top:8px;font-family:'DM Mono',monospace;letter-spacing:0.8px;min-height:16px"></div>
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="font-size:10px;color:var(--muted2);font-family:'DM Mono',monospace;letter-spacing:0.8px;margin-bottom:8px;text-transform:uppercase">Or export snippet</div>
+            <pre class="code-block" id="export-code">—</pre>
+            <button class="copy-btn" id="copy-btn">Copy Snippet</button>
+          </div>
         </div>
 
       </div><!-- end #dash-content -->
@@ -853,6 +859,7 @@
     // ── STATE ────────────────────────────────────────────────────
     let ingredients = [];   // array of ingredient objects
     let servingsDisplay = 1;
+    let currentUser = null;
 
     // ── HELPERS ──────────────────────────────────────────────────
     const $ = id => document.getElementById(id);
@@ -991,6 +998,7 @@
       $('tot-protein').textContent = fmt1(t.protein) + 'g';
       $('tot-carbs').textContent   = fmt1(t.carbs) + 'g';
       $('tot-fat').textContent     = fmt1(t.fat) + 'g';
+      updateSaveBtn();
     }
 
     // ── UPDATE MACRO DASHBOARD ───────────────────────────────────
@@ -1605,8 +1613,103 @@
       };
     }
 
+    // ── SAVE TO CLOUD ────────────────────────────────────────────
+    function updateSaveBtn() {
+      const btn = $('save-cloud-btn');
+      const msg = $('save-signin-msg');
+      if (!currentUser) {
+        msg.style.display = 'block';
+        btn.disabled = true;
+      } else {
+        msg.style.display = 'none';
+        btn.disabled = ingredients.length === 0;
+      }
+    }
+
+    async function saveToCloud() {
+      const btn      = $('save-cloud-btn');
+      const feedback = $('save-feedback');
+
+      if (!currentUser) return;
+
+      if (!ingredients.length) {
+        feedback.textContent = '⚠ Add at least one ingredient';
+        feedback.style.color = '#f87171';
+        return;
+      }
+
+      const name = txt('r-name');
+      if (!name) {
+        $('r-name').style.borderColor = '#f87171';
+        setTimeout(() => $('r-name').style.borderColor = '', 1200);
+        feedback.textContent = '⚠ Enter a recipe name first';
+        feedback.style.color = '#f87171';
+        return;
+      }
+
+      const t             = totals();
+      const bs            = getBatchServings();
+      const totalServings = bs ? Math.round(bs.servingCount) : (num('r-servings-setup') || 1);
+      const emoji         = txt('r-emoji') || '🍽️';
+      const desc          = txt('r-desc') || `${ingredients.length} ingredient${ingredients.length !== 1 ? 's' : ''}`;
+      const tags          = [...document.querySelectorAll('.tag-check:checked')].map(c => c.value);
+
+      const calPS     = t.cal     / totalServings;
+      const proteinPS = t.protein / totalServings;
+      const carbsPS   = t.carbs   / totalServings;
+      const fatPS     = t.fat     / totalServings;
+
+      const totalCalMacros = proteinPS * 4 + carbsPS * 4 + fatPS * 9;
+      const protPct = totalCalMacros ? +(proteinPS * 4 / totalCalMacros * 100).toFixed(1) : 0;
+      const carbPct = totalCalMacros ? +(carbsPS   * 4 / totalCalMacros * 100).toFixed(1) : 0;
+      const fatPct  = totalCalMacros ? +(fatPS     * 9 / totalCalMacros * 100).toFixed(1) : 0;
+
+      const recipeData = {
+        name,
+        description: desc,
+        emoji,
+        thumbBg: 'linear-gradient(135deg, #0a0f1a 0%, #111827 50%, #0a0f1a 100%)',
+        tags,
+        servings: totalServings,
+        perServing: {
+          calories: Math.round(calPS),
+          protein:  +fmt1(proteinPS),
+          carbs:    +fmt1(carbsPS),
+          fat:      +fmt1(fatPS),
+        },
+        macroSplit: { protein: protPct, carbs: carbPct, fat: fatPct },
+        ingredients: ingredients.map(ing => ({ ...ing })),
+      };
+
+      btn.disabled    = true;
+      btn.textContent = 'Saving…';
+      feedback.textContent = '';
+
+      try {
+        await saveRecipeToCloud(recipeData);
+        btn.textContent  = '✓ Saved!';
+        feedback.textContent = 'Recipe saved — visible on your home feed';
+        feedback.style.color = '#4ade80';
+        setTimeout(() => {
+          btn.textContent  = '↑ Save to Cloud';
+          btn.disabled     = false;
+          feedback.textContent = '';
+        }, 3000);
+      } catch (e) {
+        console.error(e);
+        btn.textContent  = '↑ Save to Cloud';
+        btn.disabled     = false;
+        feedback.textContent = '⚠ Save failed — check console';
+        feedback.style.color = '#f87171';
+      }
+    }
+
+    $('save-cloud-btn').addEventListener('click', saveToCloud);
+
     auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
       renderAuthNav(user);
+      updateSaveBtn();
       let profile = null;
       if (user) {
         profile = await loadProfileFromCloud();

@@ -56,11 +56,52 @@ window.loadProfileFromCloud = async function () {
   } catch { return null; }
 };
 
+// ── RECIPE HELPERS ───────────────────────────────────────
+window.saveRecipeToCloud = async function (recipeData) {
+  const user = window.auth.currentUser;
+  if (!user) throw new Error('Not signed in');
+  const docRef = await window.db.collection('recipes').add({
+    ...recipeData,
+    uid: user.uid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+  });
+  return docRef.id;
+};
+
+window.loadUserRecipes = async function () {
+  const user = window.auth.currentUser;
+  if (!user) return [];
+  try {
+    const snap = await window.db
+      .collection('recipes')
+      .where('uid', '==', user.uid)
+      .orderBy('createdAt', 'desc')
+      .get();
+    return snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (e) {
+    console.error('loadUserRecipes:', e);
+    return [];
+  }
+};
+
+window.loadRecipeById = async function (id) {
+  try {
+    const doc = await window.db.collection('recipes').doc(id).get();
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
+  } catch (e) {
+    console.error('loadRecipeById:', e);
+    return null;
+  }
+};
+
 // ── GOOGLE SIGN-IN ───────────────────────────────────────────
 window.signInWithGoogle = function () {
   const provider = new firebase.auth.GoogleAuthProvider();
-  window.auth.signInWithPopup(provider).catch(console.error);
+  window.auth.signInWithRedirect(provider).catch(console.error);
 };
+
+// Handle the redirect result when the page loads back after Google sign-in
+window.auth.getRedirectResult().catch(console.error);
 
 // ── AUTH NAV RENDERER ────────────────────────────────────────
 // Fills the #auth-nav element present on every page.

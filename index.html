@@ -195,46 +195,83 @@
       document.getElementById('recipe-count').textContent = `${recipes.length} recipe${recipes.length !== 1 ? 's' : ''}`;
 
       if (!recipes.length) {
-        grid.innerHTML = `<div class="empty-state"><div class="e-icon">🍽️</div><div class="e-text">No recipes yet — add one to recipes.js</div></div>`;
+        grid.innerHTML = `<div class="empty-state"><div class="e-icon">🍽️</div><div class="e-text">No recipes yet — build one above</div></div>`;
         return;
       }
 
       recipes.forEach((recipe, i) => {
-        const { protein, carbs, fat } = recipe.macroSplit;
-        const ps   = recipe.perServing;
-        const card = document.createElement('a');
-        card.className        = 'recipe-card';
-        card.href             = `recipes/${recipe.file}`;
-        card.dataset.tags     = JSON.stringify(recipe.tags);
-        card.style.animationDelay = `${0.05 + i * 0.05}s`;
-        card.innerHTML = `
-          <div class="card-arrow">→</div>
-          <div class="card-tag">${recipe.emoji} ${recipe.tags[0]}</div>
-          <div class="card-thumb">
-            <div class="card-thumb-bg" style="background:${recipe.thumbBg}"></div>
-            <div class="card-thumb-emoji">${recipe.emoji}</div>
-          </div>
-          <div class="card-body">
-            <div class="card-name">${recipe.name}</div>
-            <div class="card-desc">${recipe.description} · ~${recipe.servings} servings</div>
-            <div class="macro-mini">
-              <div class="macro-mini-seg" style="flex:${protein}; background:var(--protein)"></div>
-              <div class="macro-mini-seg" style="flex:${carbs};   background:var(--carbs)"></div>
-              <div class="macro-mini-seg" style="flex:${fat};     background:var(--fat)"></div>
-            </div>
-            <div class="card-macros">
-              <div class="cm-item"><div class="cm-val" style="color:var(--accent)">${ps.calories}</div><div class="cm-label">kcal</div></div>
-              <div class="cm-item"><div class="cm-val" style="color:var(--protein)">${ps.protein}g</div><div class="cm-label">protein</div></div>
-              <div class="cm-item"><div class="cm-val" style="color:var(--carbs)">${ps.carbs}g</div><div class="cm-label">carbs</div></div>
-              <div class="cm-item"><div class="cm-val" style="color:var(--fat)">${ps.fat}g</div><div class="cm-label">fat</div></div>
-            </div>
-          </div>`;
-        grid.appendChild(card);
+        grid.appendChild(makeCard(recipe, i, `recipes/${recipe.file}`));
       });
     }
 
     buildFilters(RECIPES);
     buildCards(RECIPES);
+
+    function makeCard(recipe, index, href) {
+      const { protein, carbs, fat } = recipe.macroSplit;
+      const ps   = recipe.perServing;
+      const card = document.createElement('a');
+      card.className        = 'recipe-card';
+      card.href             = href;
+      card.dataset.tags     = JSON.stringify(recipe.tags || []);
+      card.style.animationDelay = `${0.05 + index * 0.05}s`;
+      card.innerHTML = `
+        <div class="card-arrow">→</div>
+        <div class="card-tag">${recipe.emoji} ${(recipe.tags || ['Recipe'])[0]}</div>
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:${recipe.thumbBg}"></div>
+          <div class="card-thumb-emoji">${recipe.emoji}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">${recipe.name}</div>
+          <div class="card-desc">${recipe.description} · ~${recipe.servings} servings</div>
+          <div class="macro-mini">
+            <div class="macro-mini-seg" style="flex:${protein}; background:var(--protein)"></div>
+            <div class="macro-mini-seg" style="flex:${carbs};   background:var(--carbs)"></div>
+            <div class="macro-mini-seg" style="flex:${fat};     background:var(--fat)"></div>
+          </div>
+          <div class="card-macros">
+            <div class="cm-item"><div class="cm-val" style="color:var(--accent)">${ps.calories}</div><div class="cm-label">kcal</div></div>
+            <div class="cm-item"><div class="cm-val" style="color:var(--protein)">${ps.protein}g</div><div class="cm-label">protein</div></div>
+            <div class="cm-item"><div class="cm-val" style="color:var(--carbs)">${ps.carbs}g</div><div class="cm-label">carbs</div></div>
+            <div class="cm-item"><div class="cm-val" style="color:var(--fat)">${ps.fat}g</div><div class="cm-label">fat</div></div>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    function appendCloudCards(cloudRecipes) {
+      // Remove any previously rendered cloud cards before re-rendering
+      document.querySelectorAll('.recipe-card[data-cloud]').forEach(c => c.remove());
+      if (!cloudRecipes.length) return;
+
+      const grid    = document.getElementById('recipe-grid');
+      const bar     = document.getElementById('filter-bar');
+      const baseIdx = RECIPES.length;
+
+      // Add any new tags from cloud recipes to the filter bar
+      const existingTags = new Set([...bar.querySelectorAll('.filter-pill')].map(p => p.dataset.filter));
+      cloudRecipes.flatMap(r => r.tags || []).forEach(tag => {
+        if (!existingTags.has(tag)) {
+          existingTags.add(tag);
+          const pill = document.createElement('div');
+          pill.className      = 'filter-pill';
+          pill.dataset.filter = tag;
+          pill.textContent    = tag;
+          bar.appendChild(pill);
+        }
+      });
+
+      cloudRecipes.forEach((recipe, i) => {
+        const card = makeCard(recipe, baseIdx + i, `view.html?id=${recipe.id}`);
+        card.dataset.cloud = '1';
+        grid.appendChild(card);
+      });
+
+      // Re-apply active filter to include new cards
+      const activeFilter = bar.querySelector('.filter-pill.active')?.dataset.filter || 'All';
+      filterCards(activeFilter);
+    }
 
     // Auth state drives the goals bar
     auth.onAuthStateChanged(async (user) => {
@@ -243,6 +280,12 @@
       if (user) {
         profile = await loadProfileFromCloud();
         if (profile) saveLocalProfile(profile);
+        const cloudRecipes = await loadUserRecipes();
+        appendCloudCards(cloudRecipes);
+      } else {
+        // Remove cloud cards if signed out
+        document.querySelectorAll('.recipe-card[data-cloud]').forEach(c => c.remove());
+        filterCards(document.querySelector('.filter-pill.active')?.dataset.filter || 'All');
       }
       if (!profile) profile = getLocalProfile();
       displayGoalsBar(profile);

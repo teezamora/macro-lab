@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipe — LATTITUDE</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <style>
+    .recipe-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: rgba(10,11,12,0.92); backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    @media (max-width: 640px) { .recipe-nav { padding: 16px 20px; } }
+
+    /* Loading / error states */
+    .state-wrap {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 60vh; gap: 16px;
+      font-family: 'DM Mono', monospace; font-size: 12px;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--muted);
+    }
+    .state-wrap .s-icon { font-size: 40px; opacity: 0.3; }
+  </style>
+</head>
+<body class="fade-up">
+
+  <nav class="recipe-nav">
+    <a href="index.html" class="back-btn"><span class="back-arrow">←</span> All Recipes</a>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div id="auth-nav"></div>
+      <a href="index.html" class="nav-logo" style="font-size:18px">LATT<span>ITUDE</span></a>
+    </div>
+  </nav>
+
+  <div id="loading-state" class="state-wrap">
+    <div class="s-icon">⏳</div>
+    <div>Loading recipe…</div>
+  </div>
+
+  <div id="error-state" class="state-wrap" style="display:none">
+    <div class="s-icon">🍽️</div>
+    <div>Recipe not found</div>
+    <a href="index.html" class="btn-add" style="margin-top:8px">← Back to Recipes</a>
+  </div>
+
+  <div id="recipe-wrap" class="recipe-page-wrap" style="display:none">
+
+    <div class="recipe-header">
+      <div class="recipe-tag" id="v-tag"></div>
+      <div class="recipe-page-title" id="v-title"></div>
+      <div class="recipe-page-sub" id="v-sub"></div>
+    </div>
+
+    <div class="serving-bar">
+      <div>
+        <div class="serving-label">Adjust Serving Size</div>
+        <div class="serving-note" id="v-serving-note"></div>
+      </div>
+      <div class="serving-controls">
+        <button class="serving-btn serving-btn-minus">−</button>
+        <div class="serving-count-display">1</div>
+        <span class="serving-unit">serving(s)</span>
+        <button class="serving-btn serving-btn-plus">+</button>
+      </div>
+    </div>
+
+    <div class="macro-hero">
+      <div class="cal-card">
+        <div>
+          <div class="cal-label">Total Calories</div>
+          <div class="cal-num" id="v-cal">0</div>
+          <div class="cal-sub" id="v-cal-sub"></div>
+        </div>
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 90 90">
+            <circle cx="45" cy="45" r="38" fill="none" stroke="#252729" stroke-width="10"/>
+            <circle id="ring-fat"  cx="45" cy="45" r="38" fill="none" stroke="#f97316" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+            <circle id="ring-carb" cx="45" cy="45" r="38" fill="none" stroke="#facc15" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+            <circle id="ring-prot" cx="45" cy="45" r="38" fill="none" stroke="#4ade80" stroke-width="10" stroke-dasharray="238.8" stroke-dashoffset="0" transform="rotate(-90 45 45)"/>
+          </svg>
+          <div class="ring-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div><span id="v-prot-pct" style="color:#4ade80;font-weight:600">—</span>&nbsp;Protein</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div><span id="v-carb-pct" style="color:#facc15;font-weight:600">—</span>&nbsp;Carbs</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span id="v-fat-pct"  style="color:#f97316;font-weight:600">—</span>&nbsp;Fat</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="macro-card">
+        <div class="accent-line" style="background:var(--protein)"></div>
+        <div class="m-label">Protein</div>
+        <div class="m-val" style="color:var(--protein)"><span id="v-protein">0</span><span class="m-unit">g</span></div>
+        <div class="m-cal" id="v-protein-cal"></div>
+        <div class="m-pct-bar"><div class="m-pct-fill" id="v-prot-bar" style="background:var(--protein);width:0%"></div></div>
+        <div class="m-pct-label" id="v-prot-pct-lbl"></div>
+      </div>
+
+      <div class="macro-card">
+        <div class="accent-line" style="background:var(--carbs)"></div>
+        <div class="m-label">Carbohydrates</div>
+        <div class="m-val" style="color:var(--carbs)"><span id="v-carbs">0</span><span class="m-unit">g</span></div>
+        <div class="m-cal" id="v-carbs-cal"></div>
+        <div class="m-pct-bar"><div class="m-pct-fill" id="v-carb-bar" style="background:var(--carbs);width:0%"></div></div>
+        <div class="m-pct-label" id="v-carb-pct-lbl"></div>
+      </div>
+
+      <div class="macro-card">
+        <div class="accent-line" style="background:var(--fat)"></div>
+        <div class="m-label">Total Fat</div>
+        <div class="m-val" style="color:var(--fat)"><span id="v-fat">0</span><span class="m-unit">g</span></div>
+        <div class="m-cal" id="v-fat-cal"></div>
+        <div class="m-pct-bar"><div class="m-pct-fill" id="v-fat-bar" style="background:var(--fat);width:0%"></div></div>
+        <div class="m-pct-label" id="v-fat-pct-lbl"></div>
+      </div>
+    </div>
+
+    <!-- SECONDARY STATS -->
+    <div class="secondary-grid">
+      <div class="stat-card"><div class="s-val" id="v-fiber"  style="color:var(--fiber)">—</div><div class="s-label">🌿 Fiber</div></div>
+      <div class="stat-card"><div class="s-val" id="v-sugar"  style="color:#f472b6">—</div><div class="s-label">🍯 Sugar</div></div>
+      <div class="stat-card"><div class="s-val" id="v-sodium" style="color:#a78bfa">—</div><div class="s-label">🧂 Sodium</div></div>
+    </div>
+
+    <!-- INGREDIENT TABLE -->
+    <div class="r-section-title">Ingredient Breakdown</div>
+    <table class="ing-table">
+      <thead>
+        <tr>
+          <th>Ingredient</th>
+          <th>Calories</th>
+          <th>Protein</th>
+          <th>Carbs</th>
+          <th>Fat</th>
+          <th>Fiber</th>
+          <th>Sugar</th>
+          <th>Sodium</th>
+        </tr>
+      </thead>
+      <tbody id="v-ing-tbody"></tbody>
+    </table>
+
+  </div><!-- end #recipe-wrap -->
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    auth.onAuthStateChanged(user => renderAuthNav(user));
+
+    const $ = id => document.getElementById(id);
+    const fmt1 = v => (+v).toFixed(1);
+    const calc100 = (grams, per100) => (grams / 100) * per100;
+
+    function sumIngredients(ingredients) {
+      return ingredients.reduce((acc, ing) => {
+        acc.cal    += calc100(ing.grams, ing.kcal100);
+        acc.protein += calc100(ing.grams, ing.protein100);
+        acc.carbs  += calc100(ing.grams, ing.carbs100);
+        acc.fat    += calc100(ing.grams, ing.fat100);
+        acc.fiber  += calc100(ing.grams, ing.fiber100  || 0);
+        acc.sugar  += calc100(ing.grams, ing.sugar100  || 0);
+        acc.sodium += calc100(ing.grams, ing.sodium100 || 0);
+        return acc;
+      }, { cal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, sugar: 0, sodium: 0 });
+    }
+
+    function updateDisplay(servings, totalServings, full) {
+      const ratio = servings / totalServings;
+      const cal     = full.cal     * ratio;
+      const protein = full.protein * ratio;
+      const carbs   = full.carbs   * ratio;
+      const fat     = full.fat     * ratio;
+      const fiber   = full.fiber   * ratio;
+      const sugar   = full.sugar   * ratio;
+      const sodium  = full.sodium  * ratio;
+
+      $('v-cal').textContent      = Math.round(cal);
+      $('v-cal-sub').textContent  = `per ${servings} serving${servings !== 1 ? 's' : ''} · ${Math.round(full.cal)} kcal full recipe`;
+      $('v-protein').textContent  = fmt1(protein);
+      $('v-carbs').textContent    = fmt1(carbs);
+      $('v-fat').textContent      = fmt1(fat);
+      $('v-protein-cal').textContent = `~${Math.round(protein * 4)} kcal`;
+      $('v-carbs-cal').textContent   = `~${Math.round(carbs * 4)} kcal`;
+      $('v-fat-cal').textContent     = `~${Math.round(fat * 9)} kcal`;
+      $('v-fiber').innerHTML  = fmt1(fiber)           + '<span style="font-size:13px">g</span>';
+      $('v-sugar').innerHTML  = fmt1(sugar)           + '<span style="font-size:13px">g</span>';
+      $('v-sodium').innerHTML = Math.round(sodium)    + '<span style="font-size:13px">mg</span>';
+    }
+
+    function renderRecipe(recipe) {
+      document.title = `${recipe.name} — LATTITUDE`;
+
+      const tags = recipe.tags || [];
+      $('v-tag').textContent       = `${recipe.emoji} ${tags.join(' · ')}`;
+      $('v-title').textContent     = recipe.name.toUpperCase();
+      $('v-sub').textContent       = `${recipe.description} · ${recipe.servings} servings`;
+      $('v-serving-note').textContent = `Recipe makes ~${recipe.servings} serving${recipe.servings !== 1 ? 's' : ''}`;
+
+      // Macro split percentages
+      const ms = recipe.macroSplit || {};
+      $('v-prot-pct').textContent     = (ms.protein || 0) + '%';
+      $('v-carb-pct').textContent     = (ms.carbs   || 0) + '%';
+      $('v-fat-pct').textContent      = (ms.fat     || 0) + '%';
+      $('v-prot-pct-lbl').textContent = (ms.protein || 0) + '% of calories';
+      $('v-carb-pct-lbl').textContent = (ms.carbs   || 0) + '% of calories';
+      $('v-fat-pct-lbl').textContent  = (ms.fat     || 0) + '% of calories';
+      $('v-prot-bar').style.width     = (ms.protein || 0) + '%';
+      $('v-carb-bar').style.width     = (ms.carbs   || 0) + '%';
+      $('v-fat-bar').style.width      = (ms.fat     || 0) + '%';
+
+      renderDonutRing([
+        { id: 'ring-fat',  pct: (ms.fat     || 0) / 100, color: '#f97316' },
+        { id: 'ring-carb', pct: (ms.carbs   || 0) / 100, color: '#facc15' },
+        { id: 'ring-prot', pct: (ms.protein || 0) / 100, color: '#4ade80' },
+      ]);
+
+      const ingredients = recipe.ingredients || [];
+      const full = ingredients.length
+        ? sumIngredients(ingredients)
+        : {
+            cal:     recipe.perServing.calories * recipe.servings,
+            protein: recipe.perServing.protein  * recipe.servings,
+            carbs:   recipe.perServing.carbs    * recipe.servings,
+            fat:     recipe.perServing.fat      * recipe.servings,
+            fiber: 0, sugar: 0, sodium: 0,
+          };
+
+      // Render ingredient rows
+      const tbody = $('v-ing-tbody');
+      ingredients.forEach(ing => {
+        const cal     = calc100(ing.grams, ing.kcal100);
+        const protein = calc100(ing.grams, ing.protein100);
+        const carbs   = calc100(ing.grams, ing.carbs100);
+        const fat     = calc100(ing.grams, ing.fat100);
+        const fiber   = calc100(ing.grams, ing.fiber100  || 0);
+        const sugar   = calc100(ing.grams, ing.sugar100  || 0);
+        const sodium  = calc100(ing.grams, ing.sodium100 || 0);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${ing.name}<span class="ing-sub">${ing.grams}g${ing.source ? ' · ' + ing.source : ''}</span></td>
+          <td>${Math.round(cal)}</td>
+          <td>${fmt1(protein)}g</td>
+          <td>${fmt1(carbs)}g</td>
+          <td>${fmt1(fat)}g</td>
+          <td>${fmt1(fiber)}g</td>
+          <td>${fmt1(sugar)}g</td>
+          <td>${Math.round(sodium)}mg</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // Totals row
+      if (ingredients.length) {
+        const tr = document.createElement('tr');
+        tr.className = 'totals-row';
+        tr.innerHTML = `
+          <td>FULL RECIPE TOTAL<span class="ing-sub">~${recipe.servings} servings</span></td>
+          <td>${Math.round(full.cal)}</td>
+          <td>${fmt1(full.protein)}g</td>
+          <td>${fmt1(full.carbs)}g</td>
+          <td>${fmt1(full.fat)}g</td>
+          <td>${fmt1(full.fiber)}g</td>
+          <td>${fmt1(full.sugar)}g</td>
+          <td>${Math.round(full.sodium)}mg</td>`;
+        tbody.appendChild(tr);
+      }
+
+      // Initial display (1 serving)
+      updateDisplay(1, recipe.servings, full);
+
+      initServingScaler({
+        total:         full,
+        servingsTotal: recipe.servings,
+        update:        updateDisplay,
+      });
+
+      $('loading-state').style.display = 'none';
+      $('recipe-wrap').style.display   = 'block';
+    }
+
+    // Load recipe from URL param
+    const recipeId = new URLSearchParams(window.location.search).get('id');
+    if (!recipeId) {
+      $('loading-state').style.display = 'none';
+      $('error-state').style.display   = 'flex';
+    } else {
+      loadRecipeById(recipeId).then(recipe => {
+        if (!recipe) {
+          $('loading-state').style.display = 'none';
+          $('error-state').style.display   = 'flex';
+        } else {
+          renderRecipe(recipe);
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
