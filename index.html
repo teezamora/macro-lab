@@ -6,136 +6,434 @@
   <title>LATTITUDE — Your Fitness, Your Way</title>
   <link rel="stylesheet" href="styles/global.css">
   <style>
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+
+    /* ── HERO ─────────────────────────────────────────────────── */
+    .hero {
+      padding: 52px 0 44px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 48px;
+    }
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(56px, 8vw, 100px);
+      line-height: 0.88;
+      letter-spacing: 1px;
+    }
+    .hero-title .hl { color: var(--accent); }
+    .hero-right { flex-shrink: 0; }
+    .hero-sub {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 300;
+      max-width: 280px;
+      line-height: 1.65;
+      text-align: right;
     }
 
-    /* HERO */
-    .hero { padding: 60px 40px 40px; max-width: 1100px; margin: 0 auto; animation: fadeUp 0.5s ease both; }
-    .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
-    .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(52px, 8vw, 96px); line-height: 0.88; letter-spacing: 1px; margin-bottom: 24px; }
-    .hero-title .hl { color: var(--accent); }
-    .hero-sub { color: var(--muted); font-size: 15px; font-weight: 300; max-width: 420px; line-height: 1.6; margin-bottom: 40px; }
+    /* ── MACRO STRIP ──────────────────────────────────────────── */
+    #macro-strip {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    .ms-item {
+      flex: 1;
+      padding: 14px 18px;
+      border-right: 1px solid var(--border);
+      min-width: 0;
+    }
+    .ms-item:last-child { border-right: none; }
+    .ms-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .ms-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 24px;
+      line-height: 1;
+    }
 
-    /* STATS BAR */
-    .stats-bar { display: flex; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 60px; }
-    .stat-item { flex: 1; padding: 18px 20px; border-right: 1px solid var(--border); background: var(--surface); }
-    .stat-item:last-child { border-right: none; }
-    .stat-item .si-val { font-family: 'Bebas Neue', sans-serif; font-size: 32px; line-height: 1; margin-bottom: 4px; }
-    .stat-item .si-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+    /* empty strip */
+    #macro-strip-empty {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .mse-text { font-size: 13px; color: var(--muted); }
+    .mse-text strong { color: var(--text); font-weight: 500; }
 
-    /* FILTER BAR */
-    .filter-bar { display: flex; gap: 8px; padding: 0 40px 28px; max-width: 1100px; margin: 0 auto; flex-wrap: wrap; }
-    .filter-pill { padding: 7px 14px; border: 1px solid var(--border); border-radius: 100px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; background: var(--surface); color: var(--muted); user-select: none; }
-    .filter-pill:hover { border-color: var(--border2); color: var(--text); }
-    .filter-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
+    /* ── TODAY'S WORKOUT FEATURE ──────────────────────────────── */
+    .today-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 40px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+      margin-bottom: 16px;
+    }
+    .today-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    .today-card::after {
+      content: '';
+      position: absolute;
+      right: -80px; top: -80px;
+      width: 320px; height: 320px;
+      background: radial-gradient(circle, rgba(232,255,71,0.04) 0%, transparent 65%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .today-card:hover {
+      border-color: rgba(232,255,71,0.28);
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+      transform: translateY(-2px);
+    }
+    .today-inner {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .today-badge {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .today-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 6vw, 84px);
+      line-height: 0.9;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .today-muscle {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.8px;
+      margin-bottom: 28px;
+    }
+    .today-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .today-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      padding: 5px 12px;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .today-cta {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: gap 0.15s;
+    }
+    .today-card:hover .today-cta { gap: 12px; }
+    .today-cta-arrow { font-size: 22px; }
 
-    /* SECTION HEADER */
-    .section-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; padding: 0 40px; max-width: 1100px; margin-left: auto; margin-right: auto; }
-    .section-heading { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; }
-    .section-meta { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+    /* recovery/rest states */
+    .today-card.is-rest::before { background: var(--muted2); }
+    .today-card.is-rest::after { display: none; }
+    .today-card.is-rest .today-badge { color: var(--muted); }
+    .today-card.is-rest .today-cta { color: var(--muted); }
 
-    /* RECIPE GRID */
-    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; padding: 0 40px 60px; max-width: 1100px; margin: 0 auto; }
+    /* ── SECONDARY CARDS ──────────────────────────────────────── */
+    .secondary-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+    .sec-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+    }
+    .sec-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
+    .sec-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .sec-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      letter-spacing: 1px;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .sec-body {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+      margin-bottom: 20px;
+    }
+    .sec-stat {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+    .sec-stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .sec-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .sec-footer-arrow {
+      font-size: 16px;
+      transition: transform 0.15s;
+    }
+    .sec-card:hover .sec-footer-arrow { transform: translateX(4px); }
 
-    /* RECIPE CARD */
-    .recipe-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.22s cubic-bezier(.4,0,.2,1); position: relative; text-decoration: none; display: block; color: inherit; animation: fadeUp 0.5s ease both; }
-    .recipe-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+    /* phase pill in goals card */
+    .phase-pill {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .macro-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .macro-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .macro-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      line-height: 1;
+    }
+    .macro-lbl {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
 
-    .card-thumb { height: 160px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-    .card-thumb-bg { position: absolute; inset: 0; }
-    .card-thumb-emoji { position: relative; z-index: 1; font-size: 64px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); transition: transform 0.3s ease; }
-    .recipe-card:hover .card-thumb-emoji { transform: scale(1.1); }
-
-    .card-tag { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; padding: 4px 8px; text-transform: uppercase; color: var(--muted); z-index: 2; }
-    .card-arrow { position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; background: var(--surface2); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; opacity: 0; transition: all 0.2s; z-index: 2; }
-    .recipe-card:hover .card-arrow { opacity: 1; transform: translate(2px, -2px); }
-
-    .card-body { padding: 18px 20px 20px; }
-    .card-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.5px; margin-bottom: 4px; line-height: 1.1; }
-    .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 16px; font-weight: 300; line-height: 1.5; }
-
-    .macro-mini { display: flex; gap: 3px; height: 5px; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
-    .macro-mini-seg { border-radius: 2px; }
-
-    .card-macros { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-    .cm-item { flex: 1; padding: 8px 10px; border-right: 1px solid var(--border); text-align: center; }
-    .cm-item:last-child { border-right: none; }
-    .cm-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; line-height: 1; }
-    .cm-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 2px; }
-
-    /* EMPTY STATE */
-    .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--muted); }
-    .empty-state .e-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
-    .empty-state .e-text { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
-
-    @media (max-width: 640px) {
-      .hero, .filter-bar, .section-header, .recipe-grid { padding-left: 20px; padding-right: 20px; }
-      .stats-bar { flex-wrap: wrap; }
-      .stat-item { flex: 1 1 40%; }
+    /* ── RESPONSIVE ───────────────────────────────────────────── */
+    @media (max-width: 700px) {
+      .secondary-cards { grid-template-columns: 1fr; }
+      .today-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .today-card { padding: 28px 24px 24px; }
+      .hero-right { display: none; }
+      .hero { padding: 36px 0 32px; margin-bottom: 28px; }
+    }
+    @media (max-width: 480px) {
+      .ms-item { padding: 12px 14px; }
+      .ms-val { font-size: 20px; }
     }
   </style>
 </head>
 <body>
 
+  <!-- ── NAV ──────────────────────────────────────────────── -->
   <nav class="nav">
-    <a href="index.html" class="nav-logo">LATT<span>ITUDE</span></a>
-    <div style="display:flex;gap:8px;align-items:center">
-      <div id="auth-nav"></div>
-      <a href="profile.html" class="btn-add" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border)">My Goals</a>
-      <a href="builder.html" class="btn-add">+ Build Recipe</a>
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">LATT<span>ITUDE</span></a>
+      <div class="nav-links">
+        <a href="recipes.html" class="nav-link">Recipes</a>
+        <a href="workout.html" class="nav-link">Workout</a>
+      </div>
+      <div class="nav-actions">
+        <div id="auth-nav"></div>
+        <a href="profile.html" class="btn-add" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border)">My Goals</a>
+        <a href="builder.html" class="btn-add">+ Recipe</a>
+      </div>
     </div>
   </nav>
 
-  <div class="hero">
-    <div class="hero-eyebrow">// Nutrition · Training · Physique — All In One</div>
-    <h1 class="hero-title">DEFINE YOUR<br><span class="hl">LATTITUDE</span></h1>
-    <p class="hero-sub">Your body, your rules. Track nutrition, training, and your full fitness journey — one app built around your attitude to push past every limit.</p>
-    <!-- GOALS BAR — populated from localStorage profile -->
-    <div id="goals-bar-set" class="stats-bar" style="display:none">
-      <div class="stat-item">
-        <div class="si-val" id="gb-phase" style="color:var(--accent);font-size:18px;letter-spacing:2px">—</div>
-        <div class="si-label">Prep Phase</div>
-      </div>
-      <div class="stat-item">
-        <div class="si-val" id="gb-protein" style="color:var(--protein)">—</div>
-        <div class="si-label">Daily Protein</div>
-      </div>
-      <div class="stat-item">
-        <div class="si-val" id="gb-carbs" style="color:var(--carbs)">—</div>
-        <div class="si-label">Daily Carbs</div>
-      </div>
-      <div class="stat-item">
-        <div class="si-val" id="gb-fat" style="color:var(--fat)">—</div>
-        <div class="si-label">Daily Fat</div>
-      </div>
-      <div class="stat-item">
-        <div class="si-val" id="gb-cal">—</div>
-        <div class="si-label">Daily Calories</div>
+  <div class="page-wrap">
+
+    <!-- ── HERO ───────────────────────────────────────────── -->
+    <div class="hero fade-up">
+      <div class="hero-eyebrow">// Nutrition · Training · Physique</div>
+      <div class="hero-row">
+        <h1 class="hero-title">DEFINE<br>YOUR<br><span class="hl">LATTITUDE</span></h1>
+        <div class="hero-right">
+          <p class="hero-sub">Your body, your rules. Nutrition tracking, cut-phase training, and physique goals — all in one place.</p>
+        </div>
       </div>
     </div>
 
-    <!-- NO PROFILE SET -->
-    <div id="goals-bar-empty" class="stats-bar" style="align-items:center;justify-content:space-between;padding:20px 24px">
-      <div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:4px">Set Your Daily Goals</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:300">Input your stats to calculate your macro targets and prep phase.</div>
+    <!-- ── MACRO STRIP ─────────────────────────────────────── -->
+    <div id="macro-strip" style="display:none">
+      <div class="ms-item">
+        <div class="ms-label">Phase</div>
+        <div class="ms-val" id="ms-phase" style="font-size:16px;font-family:'DM Mono';letter-spacing:2px;color:var(--accent)">—</div>
       </div>
-      <a href="profile.html" class="btn-add" style="white-space:nowrap;flex-shrink:0">Set Up Goals →</a>
+      <div class="ms-item">
+        <div class="ms-label">Protein</div>
+        <div class="ms-val" id="ms-protein" style="color:var(--protein)">—</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-label">Carbs</div>
+        <div class="ms-val" id="ms-carbs" style="color:var(--carbs)">—</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-label">Fat</div>
+        <div class="ms-val" id="ms-fat" style="color:var(--fat)">—</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-label">Calories</div>
+        <div class="ms-val" id="ms-cal">—</div>
+      </div>
     </div>
-  </div>
 
-  <div class="filter-bar" id="filter-bar">
-    <div class="filter-pill active" data-filter="All">All</div>
-  </div>
+    <div id="macro-strip-empty" style="display:none">
+      <div class="mse-text"><strong>Set your daily goals</strong> — enter your stats to calculate macro targets for your prep phase.</div>
+      <a href="profile.html" class="btn-add" style="flex-shrink:0;white-space:nowrap">Set Up Goals →</a>
+    </div>
 
-  <div class="section-header">
-    <div class="section-heading">Your Recipes</div>
-    <div class="section-meta" id="recipe-count">— recipes</div>
-  </div>
+    <!-- ── TODAY'S WORKOUT ─────────────────────────────────── -->
+    <a href="workout.html" class="today-card fade-up" id="today-card">
+      <div class="today-inner">
+        <div>
+          <div class="today-badge" id="today-badge">TODAY</div>
+          <div class="today-name" id="today-name">—</div>
+          <div class="today-muscle" id="today-muscle">—</div>
+          <div class="today-pills" id="today-pills"></div>
+        </div>
+        <div class="today-cta">
+          <span id="today-cta-label">OPEN PLAN</span>
+          <span class="today-cta-arrow">→</span>
+        </div>
+      </div>
+    </a>
 
-  <div class="recipe-grid" id="recipe-grid"></div>
+    <!-- ── SECONDARY CARDS ─────────────────────────────────── -->
+    <div class="secondary-cards">
+
+      <!-- Recipes -->
+      <a href="recipes.html" class="sec-card">
+        <div class="sec-eyebrow">Nutrition</div>
+        <div class="sec-title">RECIPES</div>
+        <div class="sec-body">High-protein, prep-friendly meals with every macro tracked per serving.</div>
+        <div class="sec-stat" id="sec-recipe-count" style="color:var(--carbs)">—</div>
+        <div class="sec-stat-label">recipes in library</div>
+        <div class="sec-footer">
+          <span>Browse Library</span>
+          <span class="sec-footer-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- My Goals -->
+      <a href="profile.html" class="sec-card" id="goals-card">
+        <div class="sec-eyebrow">Goals</div>
+        <div class="sec-title">MY GOALS</div>
+        <div id="goals-card-set" style="display:none">
+          <div id="goals-phase-pill" class="phase-pill"></div>
+          <div class="macro-row" id="goals-macro-row"></div>
+        </div>
+        <div id="goals-card-empty" class="sec-body">
+          Set your body stats and prep phase. LATTITUDE calculates your daily macro and calorie targets.
+        </div>
+        <div class="sec-footer">
+          <span id="goals-cta-label">Set Up Goals</span>
+          <span class="sec-footer-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+  </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
@@ -144,136 +442,95 @@
   <script src="recipes.js"></script>
   <script src="js/nav.js"></script>
   <script>
-    function displayGoalsBar(p) {
+
+    /* ── TODAY'S WORKOUT ──────────────────────────────────── */
+    const DAYS = [
+      { name: 'BACK WIDTH',              muscle: 'Lats · Teres · Rear Delt',       abbr: 'MON', duration: '65 min', exercises: 6, sets: 19, rest: false },
+      { name: 'SHOULDERS',               muscle: 'Front · Lateral · Rear Delt',    abbr: 'TUE', duration: '60 min', exercises: 6, sets: 20, rest: false },
+      { name: 'CHEST & TRICEPS',         muscle: 'Upper Pec · Tricep · Front Delt',abbr: 'WED', duration: '65 min', exercises: 6, sets: 19, rest: false },
+      { name: 'BACK THICKNESS & BICEPS', muscle: 'Mid-Back · Rhomboids · Bicep',   abbr: 'THU', duration: '65 min', exercises: 6, sets: 20, rest: false },
+      { name: 'LEGS & CORE',             muscle: 'Quad · Ham · Glute · Abs',       abbr: 'FRI', duration: '70 min', exercises: 7, sets: 21, rest: false },
+      { name: 'ACTIVE RECOVERY',         muscle: 'Full Body · Low Intensity',      abbr: 'SAT', rest: true },
+      { name: 'FULL REST',               muscle: 'Recovery · CNS Reset',           abbr: 'SUN', rest: true },
+    ];
+
+    const todayIdx = (new Date().getDay() + 6) % 7;
+    const day = DAYS[todayIdx];
+
+    document.getElementById('today-badge').textContent  = `Today — ${day.abbr}`;
+    document.getElementById('today-name').textContent   = day.name;
+    document.getElementById('today-muscle').textContent = day.muscle;
+
+    if (day.rest) {
+      document.getElementById('today-card').classList.add('is-rest');
+      document.getElementById('today-cta-label').textContent = 'VIEW PLAN';
+    } else {
+      const pillsEl = document.getElementById('today-pills');
+      [day.duration, `${day.exercises} exercises`, `${day.sets} sets`].forEach(text => {
+        const p = document.createElement('span');
+        p.className   = 'today-pill';
+        p.textContent = text;
+        pillsEl.appendChild(p);
+      });
+    }
+
+    /* ── RECIPE COUNT ─────────────────────────────────────── */
+    document.getElementById('sec-recipe-count').textContent = RECIPES.length;
+
+    /* ── GOALS / MACRO STRIP ──────────────────────────────── */
+    const phaseLabels = { maintenance: 'Maintenance', bulk: 'Bulk', cut: 'Cut Phase', peak: 'Peak Week' };
+    const phaseColors = { maintenance: 'var(--text)', bulk: 'var(--carbs)', cut: 'var(--protein)', peak: 'var(--accent)' };
+
+    function displayGoals(p) {
       if (!p || !p.targets) {
-        document.getElementById('goals-bar-empty').style.display = 'flex';
-        document.getElementById('goals-bar-set').style.display   = 'none';
-        return;
-      }
-      const phaseLabels = { maintenance: 'Maintenance', bulk: 'Bulk', cut: 'Cut', peak: 'Peak Week' };
-      document.getElementById('goals-bar-empty').style.display = 'none';
-      document.getElementById('goals-bar-set').style.display   = 'flex';
-      document.getElementById('gb-phase').textContent   = phaseLabels[p.phaseName] || p.phaseName;
-      document.getElementById('gb-protein').innerHTML   = p.targets.protein + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
-      document.getElementById('gb-carbs').innerHTML     = p.targets.carbs   + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
-      document.getElementById('gb-fat').innerHTML       = p.targets.fat     + '<span style="font-size:16px;font-family:\'DM Sans\'">g</span>';
-      document.getElementById('gb-cal').textContent     = p.targets.calories.toLocaleString();
-    }
-
-    function buildFilters(recipes) {
-      const bar  = document.getElementById('filter-bar');
-      const tags = [...new Set(recipes.flatMap(r => r.tags))].sort();
-      tags.forEach(tag => {
-        const pill = document.createElement('div');
-        pill.className    = 'filter-pill';
-        pill.dataset.filter = tag;
-        pill.textContent  = tag;
-        bar.appendChild(pill);
-      });
-      bar.addEventListener('click', e => {
-        const pill = e.target.closest('.filter-pill');
-        if (!pill) return;
-        bar.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        filterCards(pill.dataset.filter);
-      });
-    }
-
-    function filterCards(activeTag) {
-      const cards = document.querySelectorAll('.recipe-card[data-tags]');
-      let visible = 0;
-      cards.forEach(card => {
-        const show = activeTag === 'All' || JSON.parse(card.dataset.tags).includes(activeTag);
-        card.style.display = show ? 'block' : 'none';
-        if (show) visible++;
-      });
-      document.getElementById('recipe-count').textContent = `${visible} recipe${visible !== 1 ? 's' : ''}`;
-    }
-
-    function buildCards(recipes) {
-      const grid = document.getElementById('recipe-grid');
-      document.getElementById('recipe-count').textContent = `${recipes.length} recipe${recipes.length !== 1 ? 's' : ''}`;
-
-      if (!recipes.length) {
-        grid.innerHTML = `<div class="empty-state"><div class="e-icon">🍽️</div><div class="e-text">No recipes yet — build one above</div></div>`;
+        document.getElementById('macro-strip').style.display       = 'none';
+        document.getElementById('macro-strip-empty').style.display = 'flex';
+        document.getElementById('goals-card-empty').style.display  = 'block';
+        document.getElementById('goals-card-set').style.display    = 'none';
+        document.getElementById('goals-cta-label').textContent     = 'Set Up Goals';
         return;
       }
 
-      recipes.forEach((recipe, i) => {
-        grid.appendChild(makeCard(recipe, i, `recipes/${recipe.file}`));
-      });
-    }
+      const label = phaseLabels[p.phaseName] || p.phaseName;
+      const color = phaseColors[p.phaseName] || 'var(--text)';
 
-    buildFilters(RECIPES);
-    buildCards(RECIPES);
+      // macro strip
+      document.getElementById('macro-strip-empty').style.display = 'none';
+      document.getElementById('macro-strip').style.display       = 'flex';
+      document.getElementById('ms-phase').textContent   = label;
+      document.getElementById('ms-phase').style.color   = color;
+      document.getElementById('ms-protein').textContent = p.targets.protein + 'g';
+      document.getElementById('ms-carbs').textContent   = p.targets.carbs   + 'g';
+      document.getElementById('ms-fat').textContent     = p.targets.fat     + 'g';
+      document.getElementById('ms-cal').textContent     = p.targets.calories.toLocaleString();
 
-    function makeCard(recipe, index, href) {
-      const { protein, carbs, fat } = recipe.macroSplit;
-      const ps   = recipe.perServing;
-      const card = document.createElement('a');
-      card.className        = 'recipe-card';
-      card.href             = href;
-      card.dataset.tags     = JSON.stringify(recipe.tags || []);
-      card.style.animationDelay = `${0.05 + index * 0.05}s`;
-      card.innerHTML = `
-        <div class="card-arrow">→</div>
-        <div class="card-tag">${recipe.emoji} ${(recipe.tags || ['Recipe'])[0]}</div>
-        <div class="card-thumb">
-          <div class="card-thumb-bg" style="background:${recipe.thumbBg}"></div>
-          <div class="card-thumb-emoji">${recipe.emoji}</div>
+      // goals card
+      document.getElementById('goals-card-empty').style.display = 'none';
+      document.getElementById('goals-card-set').style.display   = 'block';
+      document.getElementById('goals-cta-label').textContent    = 'Edit Goals';
+
+      const pill = document.getElementById('goals-phase-pill');
+      pill.textContent        = label;
+      pill.style.background   = color.replace('var(', '').replace(')', '') === color ? color + '22' : `rgba(0,0,0,0.3)`;
+      pill.style.color        = color;
+      pill.style.border       = `1px solid ${color}44`;
+
+      document.getElementById('goals-macro-row').innerHTML = `
+        <div class="macro-item">
+          <div class="macro-val" style="color:var(--protein)">${p.targets.protein}<span style="font-size:16px;font-family:'DM Sans';font-weight:300">g</span></div>
+          <div class="macro-lbl">Protein</div>
         </div>
-        <div class="card-body">
-          <div class="card-name">${recipe.name}</div>
-          <div class="card-desc">${recipe.description} · ~${recipe.servings} servings</div>
-          <div class="macro-mini">
-            <div class="macro-mini-seg" style="flex:${protein}; background:var(--protein)"></div>
-            <div class="macro-mini-seg" style="flex:${carbs};   background:var(--carbs)"></div>
-            <div class="macro-mini-seg" style="flex:${fat};     background:var(--fat)"></div>
-          </div>
-          <div class="card-macros">
-            <div class="cm-item"><div class="cm-val" style="color:var(--accent)">${ps.calories}</div><div class="cm-label">kcal</div></div>
-            <div class="cm-item"><div class="cm-val" style="color:var(--protein)">${ps.protein}g</div><div class="cm-label">protein</div></div>
-            <div class="cm-item"><div class="cm-val" style="color:var(--carbs)">${ps.carbs}g</div><div class="cm-label">carbs</div></div>
-            <div class="cm-item"><div class="cm-val" style="color:var(--fat)">${ps.fat}g</div><div class="cm-label">fat</div></div>
-          </div>
+        <div class="macro-item">
+          <div class="macro-val" style="color:var(--carbs)">${p.targets.carbs}<span style="font-size:16px;font-family:'DM Sans';font-weight:300">g</span></div>
+          <div class="macro-lbl">Carbs</div>
+        </div>
+        <div class="macro-item">
+          <div class="macro-val" style="color:var(--fat)">${p.targets.fat}<span style="font-size:16px;font-family:'DM Sans';font-weight:300">g</span></div>
+          <div class="macro-lbl">Fat</div>
         </div>`;
-      return card;
     }
 
-    function appendCloudCards(cloudRecipes) {
-      // Remove any previously rendered cloud cards before re-rendering
-      document.querySelectorAll('.recipe-card[data-cloud]').forEach(c => c.remove());
-      if (!cloudRecipes.length) return;
-
-      const grid    = document.getElementById('recipe-grid');
-      const bar     = document.getElementById('filter-bar');
-      const baseIdx = RECIPES.length;
-
-      // Add any new tags from cloud recipes to the filter bar
-      const existingTags = new Set([...bar.querySelectorAll('.filter-pill')].map(p => p.dataset.filter));
-      cloudRecipes.flatMap(r => r.tags || []).forEach(tag => {
-        if (!existingTags.has(tag)) {
-          existingTags.add(tag);
-          const pill = document.createElement('div');
-          pill.className      = 'filter-pill';
-          pill.dataset.filter = tag;
-          pill.textContent    = tag;
-          bar.appendChild(pill);
-        }
-      });
-
-      cloudRecipes.forEach((recipe, i) => {
-        const card = makeCard(recipe, baseIdx + i, `view.html?id=${recipe.id}`);
-        card.dataset.cloud = '1';
-        grid.appendChild(card);
-      });
-
-      // Re-apply active filter to include new cards
-      const activeFilter = bar.querySelector('.filter-pill.active')?.dataset.filter || 'All';
-      filterCards(activeFilter);
-    }
-
-    // Auth state drives the goals bar
+    /* ── AUTH ─────────────────────────────────────────────── */
     auth.onAuthStateChanged(async (user) => {
       renderAuthNav(user);
       let profile = null;
@@ -281,16 +538,12 @@
         profile = await loadProfileFromCloud();
         if (profile) saveLocalProfile(profile);
         const cloudRecipes = await loadUserRecipes();
-        appendCloudCards(cloudRecipes);
-      } else {
-        // Remove cloud cards if signed out
-        document.querySelectorAll('.recipe-card[data-cloud]').forEach(c => c.remove());
-        filterCards(document.querySelector('.filter-pill.active')?.dataset.filter || 'All');
+        const total = RECIPES.length + cloudRecipes.length;
+        document.getElementById('sec-recipe-count').textContent = total;
       }
       if (!profile) profile = getLocalProfile();
-      displayGoalsBar(profile);
+      displayGoals(profile);
     });
   </script>
-
 </body>
 </html>

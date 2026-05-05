@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recipes — LATTITUDE</title>
+  <link rel="stylesheet" href="styles/global.css">
+  <style>
+
+    /* ── HEADER ───────────────────────────────────────────────── */
+    .recipes-header {
+      padding: 48px 0 36px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .recipes-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(52px, 7vw, 84px);
+      line-height: 0.88;
+      letter-spacing: 1px;
+    }
+    .recipes-title .hl { color: var(--accent); }
+    .recipes-header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .recipes-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* ── FILTER BAR ───────────────────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .filter-pill {
+      padding: 7px 16px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--surface);
+      color: var(--muted);
+      user-select: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .filter-pill:hover  { border-color: var(--border2); color: var(--text); }
+    .filter-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    /* ── SECTION META ─────────────────────────────────────────── */
+    .section-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .section-heading {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 1px;
+      color: var(--text);
+    }
+    .section-count {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── RECIPE GRID ──────────────────────────────────────────── */
+    .recipe-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding-bottom: 80px;
+    }
+
+    /* ── RECIPE CARD ──────────────────────────────────────────── */
+    .recipe-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(.4,0,.2,1);
+      position: relative;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+    .recipe-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    .card-thumb {
+      height: 160px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-thumb-bg  { position: absolute; inset: 0; }
+    .card-thumb-emoji {
+      position: relative; z-index: 1;
+      font-size: 64px;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+      transition: transform 0.3s ease;
+    }
+    .recipe-card:hover .card-thumb-emoji { transform: scale(1.1); }
+    .card-tag {
+      position: absolute; top: 12px; left: 12px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px; letter-spacing: 1.5px;
+      padding: 4px 8px; text-transform: uppercase;
+      color: var(--muted); z-index: 2;
+    }
+    .card-arrow {
+      position: absolute; top: 14px; right: 14px;
+      width: 28px; height: 28px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; opacity: 0; transition: all 0.2s; z-index: 2;
+    }
+    .recipe-card:hover .card-arrow { opacity: 1; transform: translate(2px, -2px); }
+    .card-body { padding: 18px 20px 20px; }
+    .card-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 22px; letter-spacing: 0.5px;
+      margin-bottom: 4px; line-height: 1.1;
+    }
+    .card-desc {
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 14px; font-weight: 300; line-height: 1.5;
+    }
+    .macro-mini { display: flex; gap: 3px; height: 4px; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .macro-mini-seg { border-radius: 2px; }
+    .card-macros { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .cm-item { flex: 1; padding: 8px 10px; border-right: 1px solid var(--border); text-align: center; }
+    .cm-item:last-child { border-right: none; }
+    .cm-val  { font-family: 'Bebas Neue', sans-serif; font-size: 18px; line-height: 1; }
+    .cm-label{ font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-top: 2px; }
+
+    /* ── EMPTY STATE ──────────────────────────────────────────── */
+    .empty-state {
+      grid-column: 1/-1;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    .empty-icon { font-size: 48px; opacity: 0.15; margin-bottom: 16px; }
+    .empty-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px; letter-spacing: 1px;
+      color: var(--muted2); margin-bottom: 8px;
+    }
+    .empty-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; color: var(--muted2);
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .recipes-header { padding: 32px 0 28px; flex-direction: column; align-items: flex-start; }
+      .recipes-header-right { align-items: flex-start; }
+      .recipe-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ──────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">LATT<span>ITUDE</span></a>
+      <div class="nav-links">
+        <a href="recipes.html" class="nav-link active">Recipes</a>
+        <a href="workout.html" class="nav-link">Workout</a>
+      </div>
+      <div class="nav-actions">
+        <div id="auth-nav"></div>
+        <a href="profile.html" class="btn-add" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border)">My Goals</a>
+        <a href="builder.html" class="btn-add">+ Recipe</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+
+    <div class="recipes-header fade-up">
+      <h1 class="recipes-title">YOUR<br><span class="hl">RECIPES</span></h1>
+      <div class="recipes-header-right">
+        <div class="recipes-eyebrow">// Recipe Library</div>
+        <a href="builder.html" class="btn-add">+ Build Recipe</a>
+      </div>
+    </div>
+
+    <div class="filter-bar" id="filter-bar">
+      <div class="filter-pill active" data-filter="All">All</div>
+    </div>
+
+    <div class="section-meta-row">
+      <div class="section-heading">All Recipes</div>
+      <div class="section-count" id="recipe-count"></div>
+    </div>
+
+    <div class="recipe-grid" id="recipe-grid"></div>
+
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-init.js"></script>
+  <script src="recipes.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+
+    function updateCount(n) {
+      document.getElementById('recipe-count').textContent = `${n} recipe${n !== 1 ? 's' : ''}`;
+    }
+
+    /* ── FILTERS ──────────────────────────────────────────── */
+    function buildFilters(recipes) {
+      const bar  = document.getElementById('filter-bar');
+      const tags = [...new Set(recipes.flatMap(r => r.tags || []))].sort();
+      tags.forEach(tag => {
+        const pill = document.createElement('div');
+        pill.className = 'filter-pill'; pill.dataset.filter = tag; pill.textContent = tag;
+        bar.appendChild(pill);
+      });
+      bar.addEventListener('click', e => {
+        const pill = e.target.closest('.filter-pill');
+        if (!pill) return;
+        bar.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        filterCards(pill.dataset.filter);
+      });
+    }
+
+    function filterCards(tag) {
+      const cards = document.querySelectorAll('.recipe-card[data-tags]');
+      let visible = 0;
+      cards.forEach(card => {
+        const show = tag === 'All' || JSON.parse(card.dataset.tags).includes(tag);
+        card.style.display = show ? 'block' : 'none';
+        if (show) visible++;
+      });
+      updateCount(visible);
+    }
+
+    /* ── MAKE CARD ────────────────────────────────────────── */
+    function makeCard(recipe, index, href) {
+      const { protein, carbs, fat } = recipe.macroSplit;
+      const ps = recipe.perServing;
+      const card = document.createElement('a');
+      card.className            = 'recipe-card';
+      card.href                 = href;
+      card.dataset.tags         = JSON.stringify(recipe.tags || []);
+      card.style.animationDelay = `${index * 0.04}s`;
+      card.innerHTML = `
+        <div class="card-arrow">→</div>
+        <div class="card-tag">${recipe.emoji} ${(recipe.tags || ['Recipe'])[0]}</div>
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:${recipe.thumbBg}"></div>
+          <div class="card-thumb-emoji">${recipe.emoji}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-name">${recipe.name}</div>
+          <div class="card-desc">${recipe.description} · ~${recipe.servings} servings</div>
+          <div class="macro-mini">
+            <div class="macro-mini-seg" style="flex:${protein};background:var(--protein)"></div>
+            <div class="macro-mini-seg" style="flex:${carbs};background:var(--carbs)"></div>
+            <div class="macro-mini-seg" style="flex:${fat};background:var(--fat)"></div>
+          </div>
+          <div class="card-macros">
+            <div class="cm-item"><div class="cm-val" style="color:var(--accent)">${ps.calories}</div><div class="cm-label">kcal</div></div>
+            <div class="cm-item"><div class="cm-val" style="color:var(--protein)">${ps.protein}g</div><div class="cm-label">protein</div></div>
+            <div class="cm-item"><div class="cm-val" style="color:var(--carbs)">${ps.carbs}g</div><div class="cm-label">carbs</div></div>
+            <div class="cm-item"><div class="cm-val" style="color:var(--fat)">${ps.fat}g</div><div class="cm-label">fat</div></div>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    /* ── BUILD GRID ───────────────────────────────────────── */
+    function buildCards(recipes) {
+      const grid = document.getElementById('recipe-grid');
+      updateCount(recipes.length);
+      if (!recipes.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🍽️</div>
+            <div class="empty-title">No Recipes Yet</div>
+            <div class="empty-sub">Build your first recipe to get started</div>
+            <a href="builder.html" class="btn-add">+ Build Recipe</a>
+          </div>`;
+        return;
+      }
+      recipes.forEach((r, i) => grid.appendChild(makeCard(r, i, `recipes/${r.file}`)));
+    }
+
+    function appendCloudCards(cloudRecipes) {
+      document.querySelectorAll('.recipe-card[data-cloud]').forEach(c => c.remove());
+      if (!cloudRecipes.length) return;
+      const grid = document.getElementById('recipe-grid');
+      const bar  = document.getElementById('filter-bar');
+      const base = RECIPES.length;
+      const existing = new Set([...bar.querySelectorAll('.filter-pill')].map(p => p.dataset.filter));
+      cloudRecipes.flatMap(r => r.tags || []).forEach(tag => {
+        if (!existing.has(tag)) {
+          existing.add(tag);
+          const p = document.createElement('div');
+          p.className = 'filter-pill'; p.dataset.filter = tag; p.textContent = tag;
+          bar.appendChild(p);
+        }
+      });
+      cloudRecipes.forEach((r, i) => {
+        const card = makeCard(r, base + i, `view.html?id=${r.id}`);
+        card.dataset.cloud = '1';
+        grid.appendChild(card);
+      });
+      const active = bar.querySelector('.filter-pill.active')?.dataset.filter || 'All';
+      filterCards(active);
+    }
+
+    buildFilters(RECIPES);
+    buildCards(RECIPES);
+
+    auth.onAuthStateChanged(async (user) => {
+      renderAuthNav(user);
+      if (user) {
+        appendCloudCards(await loadUserRecipes());
+      } else {
+        document.querySelectorAll('.recipe-card[data-cloud]').forEach(c => c.remove());
+        filterCards(document.querySelector('.filter-pill.active')?.dataset.filter || 'All');
+      }
+    });
+  </script>
+</body>
+</html>

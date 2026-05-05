@@ -52,15 +52,12 @@ body::before {
    SHARED NAV
    ============================================================ */
 .nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 40px;
   border-bottom: 1px solid var(--border);
   position: sticky; top: 0;
   background: rgba(10,11,12,0.92);
   backdrop-filter: blur(12px);
   z-index: 100;
+  height: 64px;
 }
 .nav-logo {
   font-family: 'Bebas Neue', sans-serif;
@@ -367,8 +364,52 @@ body::before {
 }
 
 /* ============================================================
-   RESPONSIVE
+   SHARED PAGE WIDTH — nav + content share the same container
+   so they always align regardless of viewport size.
    ============================================================ */
+
+/* The nav background spans full width; this inner div centers content. */
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 64px);
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* Page sections use the same horizontal rhythm. */
+.page-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 clamp(24px, 4vw, 64px);
+}
+
+/* ============================================================
+   NAV LINKS — Bebas Neue to match brand display type
+   ============================================================ */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 36px;
+}
+.nav-link {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 19px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 5px;
+  transition: color 0.15s;
+  white-space: nowrap;
+  line-height: 1;
+}
+.nav-link:hover { color: var(--text); }
+.nav-link.active { color: var(--accent); }
+.nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+
 /* ============================================================
    AUTH NAV
    ============================================================ */
@@ -399,10 +440,12 @@ body::before {
    RESPONSIVE
    ============================================================ */
 @media (max-width: 640px) {
-  .nav, .recipe-nav { padding: 16px 20px; }
+  .nav { height: 54px; }
+  .recipe-nav { padding: 0 20px; height: 54px; display: flex; align-items: center; }
   .macro-hero { grid-template-columns: 1fr; }
   .secondary-grid { grid-template-columns: repeat(2,1fr); }
   .recipe-page-wrap { padding: 24px 20px 60px; }
   .cal-card { flex-direction: column; align-items: flex-start; gap: 16px; }
   .auth-name { display: none; }
+  .nav-links { display: none; }
 }
