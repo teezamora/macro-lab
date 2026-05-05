@@ -519,6 +519,17 @@
     /* ── MOBILE TWEAKS ───────────────────────────────────────── */
     @media (max-width: 640px) {
       .day-tabs-wrap { top: 54px; }
+      /* Lift session bar above bottom nav */
+      #session-bar { bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
+      /* Extra bottom clearance: bottom nav + session bar height */
+      .workout-wrap { padding-bottom: 160px; }
+      /* Bigger session bar buttons for gym use */
+      .sbtn { padding: 11px 18px; font-size: 11px; }
+      #session-time { font-size: 26px; min-width: 72px; }
+      /* Bigger set-completion button — easier with sweaty fingers */
+      .set-complete-btn { padding: 14px 0; font-size: 11px; letter-spacing: 1px; }
+      /* Bigger set dots for easier reading */
+      .set-dot { width: 12px; height: 12px; }
     }
     @media (max-width: 480px) {
       .ex-pill-weight { display: none; }
