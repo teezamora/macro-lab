@@ -39,57 +39,6 @@
       margin-bottom: 28px;
     }
 
-    /* ── API KEY BANNER ──────────────────────────────────────── */
-    #api-key-banner {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--carbs);
-      border-radius: 10px;
-      padding: 14px 16px;
-      max-width: calc(1100px - 2 * clamp(24px,4vw,64px));
-      margin: 0 auto 20px;
-      display: none;
-    }
-    #api-key-banner.visible { display: block; }
-    .api-key-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 1.5px;
-      color: var(--carbs);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .api-key-desc { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.5; }
-    .api-key-row { display: flex; gap: 8px; }
-    #api-key-input {
-      flex: 1;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      color: var(--text);
-      outline: none;
-    }
-    #api-key-input:focus { border-color: var(--accent); }
-    #api-key-save {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-family: 'DM Mono', monospace;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 1px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: background 0.15s;
-      white-space: nowrap;
-    }
-    #api-key-save:hover { background: var(--accent2); }
-
     /* ── DAY TABS ────────────────────────────────────────────── */
     .day-tabs-wrap {
       position: sticky;
@@ -313,53 +262,8 @@
     .ex-detail {
       display: none;
       border-top: 1px solid var(--border);
-      flex-direction: column;
     }
-    .ex-card.open .ex-detail { display: flex; }
-
-    /* image pane */
-    .ex-detail-img {
-      background: var(--surface2);
-      min-height: 200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    .ex-detail-img svg {
-      max-width: 100%;
-      max-height: 260px;
-      display: block;
-    }
-    .ex-detail-img .fallback-emoji {
-      font-size: 56px;
-      opacity: 0.25;
-    }
-
-    /* spinner */
-    .ex-spinner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      color: var(--muted);
-    }
-    .ex-spinner-ring {
-      width: 32px; height: 32px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .ex-spinner-text {
-      font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
+    .ex-card.open .ex-detail { display: block; }
 
     /* detail body */
     .ex-detail-body { padding: 16px; }
@@ -425,19 +329,6 @@
       background: var(--surface2);
       border-radius: 6px;
       border: 1px solid var(--border);
-    }
-
-    /* ── DESKTOP: image left, details right ──────────────────── */
-    @media (min-width: 600px) {
-      .ex-card.open .ex-detail { flex-direction: row; }
-      .ex-detail-img {
-        min-height: unset;
-        width: 230px;
-        flex-shrink: 0;
-        border-bottom: none;
-        border-right: 1px solid var(--border);
-      }
-      .ex-detail-body { flex: 1; min-width: 0; }
     }
 
     /* ── RECOVERY PANEL ──────────────────────────────────────── */
@@ -708,16 +599,6 @@
     <p class="workout-page-sub">Cut-phase training to maintain muscle, accelerate fat loss, and build stage-ready physique detail.</p>
   </div>
 
-  <!-- ── API KEY BANNER ───────────────────────────────────── -->
-  <div id="api-key-banner">
-    <div class="api-key-label">⚡ Exercise Illustrations</div>
-    <p class="api-key-desc">Enter your Groq API key to enable AI-generated exercise illustrations. Your key is saved locally and never leaves your browser.</p>
-    <div class="api-key-row">
-      <input id="api-key-input" type="password" placeholder="gsk_..." autocomplete="off" />
-      <button id="api-key-save">Save Key</button>
-    </div>
-  </div>
-
   <!-- ── DAY TABS ─────────────────────────────────────────── -->
   <div class="day-tabs-wrap">
     <div class="day-tabs" id="day-tabs"></div>
@@ -746,84 +627,6 @@
   <script src="js/nav.js"></script>
 
   <script>
-    /* ── API KEY MANAGEMENT ─────────────────────────────────── */
-    const LS_API_KEY = 'lattitude_groq_key';
-
-    function getApiKey() {
-      return localStorage.getItem(LS_API_KEY) || '';
-    }
-
-    function showApiKeyBanner() {
-      document.getElementById('api-key-banner').classList.add('visible');
-    }
-
-    document.getElementById('api-key-save').addEventListener('click', () => {
-      const val = document.getElementById('api-key-input').value.trim();
-      if (!val) return;
-      localStorage.setItem(LS_API_KEY, val);
-      document.getElementById('api-key-banner').classList.remove('visible');
-    });
-
-    if (!getApiKey()) showApiKeyBanner();
-
-    /* ── SVG ILLUSTRATION CACHE ─────────────────────────────── */
-    // Keyed by exercise name; persists for the session only (in memory)
-    const svgCache = {};
-
-    async function fetchExerciseSVG(exerciseName) {
-      if (svgCache[exerciseName]) return svgCache[exerciseName];
-
-      const apiKey = getApiKey();
-      if (!apiKey) {
-        return null; // no key configured
-      }
-
-      const prompt = `You are a minimalist fitness illustration assistant.
-
-Return ONLY a valid SVG element — nothing else. No markdown, no code fences, no explanation. Start your response with <svg and end with </svg>.
-
-Draw a clean instructional illustration of the exercise: "${exerciseName}"
-
-Technical requirements:
-- viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"
-- Background rectangle: fill #131415
-- Stick-figure body: circles for joints (r=5 to r=10), straight lines for limbs, stroke #f0f0ee, stroke-width 2.5
-- Primary working muscle region: highlighted with a subtle filled shape or thicker strokes in color #e8ff47 (yellow-green)
-- Equipment (barbell, dumbbell, cable, bench): stroke #4a4d52, stroke-width 2, simple geometric shapes
-- Show the figure at the primary exercise position (mid-range or starting position)
-- Small text label at bottom center: exercise name in sans-serif, font-size 10, fill #6b6e73
-- Keep the figure proportional and centered in the canvas
-- Use only SVG primitives: rect, circle, line, path, text`;
-
-      try {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            max_tokens: 2048,
-            messages: [{ role: 'user', content: prompt }]
-          })
-        });
-
-        if (!res.ok) throw new Error(`API ${res.status}`);
-        const data = await res.json();
-        const text = data.choices?.[0]?.message?.content || '';
-
-        // Extract SVG from the response — handle any trailing text
-        const svgMatch = text.match(/<svg[\s\S]*<\/svg>/i);
-        const svg = svgMatch ? svgMatch[0] : null;
-        if (svg) svgCache[exerciseName] = svg;
-        return svg;
-      } catch (err) {
-        console.warn('SVG generation failed for', exerciseName, err);
-        return null;
-      }
-    }
-
     /* ── BUILD TABS ─────────────────────────────────────────── */
     function buildTabs() {
       const tabsEl = document.getElementById('day-tabs');
@@ -941,9 +744,6 @@ Technical requirements:
             <span class="ex-chevron">▾</span>
           </div>
           <div class="ex-detail">
-            <div class="ex-detail-img" data-img-pane="${escHtml(ex.name)}">
-              <!-- SVG loads here on first open -->
-            </div>
             <div class="ex-detail-body">
               <div class="ex-detail-stats">
                 <div class="ex-stat accent-stat">
@@ -990,54 +790,25 @@ Technical requirements:
         </div>`;
     }
 
-    /* ── CARD TOGGLE + SVG LOAD ─────────────────────────────── */
+    /* ── CARD TOGGLE ─────────────────────────────────────────── */
     function attachCardListeners(panel, day) {
       panel.querySelectorAll('.ex-card').forEach(card => {
         const header = card.querySelector('.ex-card-header');
-        const imgPane = card.querySelector('.ex-detail-img');
-        const exName  = card.dataset.exercise;
-        let svgLoaded = false;
+        const exName = card.dataset.exercise;
+        const safeId = exName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        const cmpBtn = card.querySelector('.set-complete-btn');
+        const skipBtn = card.querySelector('.set-skip-btn');
 
-        // Set tracker
-        const safeId   = exName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-        const cmpBtn   = card.querySelector('.set-complete-btn');
-        const skipBtn  = card.querySelector('.set-skip-btn');
         if (cmpBtn) {
           initSetState(safeId, parseInt(cmpBtn.dataset.sets) || 1);
           cmpBtn.addEventListener('click', () => completeSet(safeId));
         }
         if (skipBtn) skipBtn.addEventListener('click', () => skipSetRest(safeId));
 
-        header.addEventListener('click', async () => {
+        header.addEventListener('click', () => {
           const wasOpen = card.classList.contains('open');
-          // close all cards in this panel
           panel.querySelectorAll('.ex-card').forEach(c => c.classList.remove('open'));
-          if (!wasOpen) {
-            card.classList.add('open');
-            // load SVG once per session
-            if (!svgLoaded) {
-              svgLoaded = true;
-              if (!imgPane.innerHTML.trim()) {
-                imgPane.innerHTML = `
-                  <div class="ex-spinner">
-                    <div class="ex-spinner-ring"></div>
-                    <div class="ex-spinner-text">Generating…</div>
-                  </div>`;
-                const svg = await fetchExerciseSVG(exName);
-                if (svg) {
-                  imgPane.innerHTML = svg;
-                } else if (getApiKey()) {
-                  imgPane.innerHTML = `<span class="fallback-emoji" title="Illustration unavailable">🏋️</span>`;
-                } else {
-                  imgPane.innerHTML = `
-                    <div style="text-align:center;padding:16px;">
-                      <div style="font-size:32px;margin-bottom:8px;opacity:0.3">🔑</div>
-                      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase">Add API Key Above</div>
-                    </div>`;
-                }
-              }
-            }
-          }
+          if (!wasOpen) card.classList.add('open');
         });
       });
     }
