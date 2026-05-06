@@ -95,25 +95,29 @@ window.loadRecipeById = async function (id) {
 };
 
 // ── GOOGLE SIGN-IN ───────────────────────────────────────────
-// signInWithPopup is required on GitHub Pages — the redirect flow breaks because
-// Firebase's auth handler (firebaseapp.com) cannot write session data back across
-// the origin boundary to github.io in browsers that block third-party storage.
 window.signInWithGoogle = function () {
   const provider = new firebase.auth.GoogleAuthProvider();
-  window.auth.signInWithPopup(provider).catch(err => {
-    // popup blocked (some mobile browsers) — fall back to redirect
-    if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-cancelled-by-user') {
-      window.auth.signInWithRedirect(provider).catch(console.error);
-    } else {
-      console.error('Google sign-in error:', err);
-    }
-  });
+  const btn = document.querySelector('.auth-signin');
+  if (btn) { btn.textContent = 'Opening…'; btn.disabled = true; }
+
+  window.auth.signInWithPopup(provider)
+    .then(result => {
+      console.log('Sign-in success:', result.user.displayName);
+    })
+    .catch(err => {
+      console.error('Sign-in error code:', err.code, err.message);
+      if (btn) { btn.textContent = 'Sign in with Google'; btn.disabled = false; }
+      if (err.code === 'auth/popup-blocked') {
+        alert('Popup was blocked by your browser.\nPlease allow popups for this site and try again.');
+      } else if (err.code !== 'auth/popup-cancelled-by-user' && err.code !== 'auth/cancelled-popup-request') {
+        alert('Sign-in failed: ' + err.message);
+      }
+    });
 };
 
-// Handle any pending redirect result (fallback path for mobile popup-blocked cases)
 window.auth.getRedirectResult().then(result => {
   if (result && result.user) console.log('Signed in via redirect:', result.user.displayName);
-}).catch(console.error);
+}).catch(e => console.error('getRedirectResult error:', e.code, e.message));
 
 // ── AUTH NAV RENDERER ────────────────────────────────────────
 // Fills the #auth-nav element present on every page.
