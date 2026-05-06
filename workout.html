@@ -570,16 +570,42 @@
       background: transparent;
     }
 
-    /* ── WEIGHT INPUT ──────────────────────────────────────────── */
+    /* ── WEIGHT STEPPER ─────────────────────────────────────────── */
+    .weight-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 5px 0 3px;
+    }
+    .weight-step-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      padding: 7px 10px;
+      min-width: 40px;
+      min-height: 36px;
+      cursor: pointer;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .weight-step-btn:active { background: var(--accent); color: #000; border-color: transparent; }
     .weight-input {
+      flex: 1;
+      min-width: 0;
       background: transparent;
       border: none;
       border-bottom: 1px solid var(--border2);
       color: var(--accent);
       font-family: 'DM Mono', monospace;
-      font-size: 15px;
+      font-size: 16px;
       padding: 2px 0;
-      width: 100%;
+      text-align: center;
       outline: none;
       -moz-appearance: textfield;
       caret-color: var(--accent);
@@ -587,13 +613,14 @@
     .weight-input::-webkit-outer-spin-button,
     .weight-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .weight-input:focus { border-bottom-color: var(--accent); }
-    .weight-input::placeholder { color: var(--muted2); }
+    .weight-input::placeholder { color: var(--muted2); font-size: 13px; }
     .weight-suggest {
       font-size: 9px;
       color: var(--muted2);
       font-family: 'DM Mono', monospace;
       letter-spacing: 0.5px;
-      margin-top: 3px;
+      margin-top: 2px;
+      min-height: 13px;
     }
 
   </style>
@@ -776,10 +803,14 @@
               <div class="ex-detail-stats">
                 <div class="ex-stat accent-stat">
                   <div class="ex-stat-label">Weight Logged</div>
-                  <input type="number" inputmode="decimal" class="weight-input" id="wi-${safeId}"
-                    placeholder="—" step="2.5" min="0"
-                    data-suggest="${escHtml(ex.weight)}" autocomplete="off">
-                  <div class="weight-suggest">Plan: ${escHtml(ex.weight)}</div>
+                  <div class="weight-stepper">
+                    <button type="button" class="weight-step-btn" data-delta="-5">−5</button>
+                    <input type="number" inputmode="decimal" class="weight-input" id="wi-${safeId}"
+                      placeholder="lbs" step="2.5" min="0"
+                      data-suggest="${escHtml(ex.weight)}" autocomplete="off">
+                    <button type="button" class="weight-step-btn" data-delta="5">+5</button>
+                  </div>
+                  <div class="weight-suggest" id="ws-${safeId}">Plan: ${escHtml(ex.weight)}</div>
                 </div>
                 <div class="ex-stat">
                   <div class="ex-stat-label">Rest</div>
@@ -831,7 +862,7 @@
         const skipBtn = card.querySelector('.set-skip-btn');
 
         if (cmpBtn) {
-          initSetState(safeId, parseInt(cmpBtn.dataset.sets) || 1);
+          initSetState(safeId, parseInt(cmpBtn.dataset.sets) || 1, exName, day.id);
           cmpBtn.addEventListener('click', () => completeSet(safeId));
         }
         if (skipBtn) skipBtn.addEventListener('click', () => skipSetRest(safeId));
@@ -842,17 +873,28 @@
           if (!wasOpen) card.classList.add('open');
         });
 
-        // Weight input: restore saved value and persist on change
+        // Weight stepper: restore saved value, wire +/- buttons, persist on change
         const wInput = card.querySelector('.weight-input');
         if (wInput) {
           const saved = localStorage.getItem(`latt_weight_${safeId}`);
           if (saved) wInput.value = saved;
+
           wInput.addEventListener('input', () => {
             if (wInput.value) {
               localStorage.setItem(`latt_weight_${safeId}`, wInput.value);
             } else {
               localStorage.removeItem(`latt_weight_${safeId}`);
             }
+          });
+
+          card.querySelectorAll('.weight-step-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const delta = parseFloat(btn.dataset.delta);
+              const cur   = parseFloat(wInput.value) || 0;
+              const next  = Math.max(0, cur + delta);
+              wInput.value = next % 1 === 0 ? next : next.toFixed(1);
+              wInput.dispatchEvent(new Event('input'));
+            });
           });
         }
       });
@@ -908,9 +950,9 @@
     /* ── SET TRACKER ─────────────────────────────────────────── */
     const setStates = {};
 
-    function initSetState(id, total) {
+    function initSetState(id, total, exName, dayId) {
       const saved = Math.min(parseInt(localStorage.getItem(`latt_set_${id}`) || '0'), total);
-      if (!setStates[id]) setStates[id] = { done: saved, total, timer: null };
+      if (!setStates[id]) setStates[id] = { done: saved, total, timer: null, name: exName || id, dayId: dayId || '' };
       const st = setStates[id];
       for (let i = 0; i < st.done; i++) {
         const dot = document.getElementById(`dot-${id}-${i}`);
@@ -935,6 +977,12 @@
       if (dot) dot.classList.add('done');
       st.done++;
       localStorage.setItem(`latt_set_${id}`, String(st.done));
+      // Save weight to Firestore if signed in
+      const wInput = document.getElementById(`wi-${id}`);
+      const weight = wInput ? parseFloat(wInput.value) : 0;
+      if (weight > 0 && window.saveWorkoutLog) {
+        window.saveWorkoutLog(id, st.name, weight, st.done, st.dayId).catch(console.error);
+      }
       const btn  = document.getElementById(`scb-${id}`);
       const secs = parseInt(btn.dataset.secs) || 90;
       if (st.done >= st.total) {
@@ -1002,8 +1050,43 @@
       switchDay(todayIndex);
     }
 
-    // Auth nav
-    auth.onAuthStateChanged(user => renderAuthNav(user));
+    // Auth nav + load workout history
+    auth.onAuthStateChanged(user => {
+      renderAuthNav(user);
+      if (user) loadAndApplyWorkoutLogs();
+    });
+
+    /* ── WORKOUT LOG / PROGRESSION ──────────────────────────── */
+    function fmtLogDate(dateStr) {
+      const d    = new Date(dateStr + 'T12:00:00');
+      const now  = new Date();
+      const diff = Math.floor((now - d) / 86400000);
+      if (diff === 0) return 'Today';
+      if (diff === 1) return 'Yesterday';
+      if (diff <  7)  return `${diff}d ago`;
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    function applyWorkoutLogs(logs) {
+      Object.entries(logs).forEach(([exerciseId, log]) => {
+        const input   = document.getElementById(`wi-${exerciseId}`);
+        const suggest = document.getElementById(`ws-${exerciseId}`);
+        // Pre-fill input only if user hasn't typed anything yet this session
+        if (input && !input.value) {
+          input.value = log.weight;
+          localStorage.setItem(`latt_weight_${exerciseId}`, String(log.weight));
+        }
+        if (suggest) {
+          const dateLabel = fmtLogDate(log.date);
+          suggest.textContent = `Last: ${log.weight} lbs · ${dateLabel}`;
+        }
+      });
+    }
+
+    async function loadAndApplyWorkoutLogs() {
+      const logs = await window.loadRecentWorkoutLogs();
+      applyWorkoutLogs(logs);
+    }
 
     /* ── SESSION TIMER ──────────────────────────────────────── */
     const SK_ELAPSED = 'latt_sess_elapsed';

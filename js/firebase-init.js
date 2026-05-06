@@ -56,6 +56,48 @@ window.loadProfileFromCloud = async function () {
   } catch { return null; }
 };
 
+// ── WORKOUT LOG HELPERS ──────────────────────────────────────
+window.saveWorkoutLog = async function (exerciseId, exerciseName, weight, setsCompleted, dayId) {
+  const user = window.auth.currentUser;
+  if (!user || !weight || weight <= 0) return;
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const docId  = `${exerciseId}_${today}`;
+  await window.db
+    .collection('users').doc(user.uid)
+    .collection('workoutLogs').doc(docId)
+    .set({
+      exerciseId,
+      exerciseName,
+      weight:        parseFloat(weight),
+      setsCompleted: setsCompleted || 0,
+      dayId:         dayId || '',
+      date:          today,
+      timestamp:     firebase.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true });
+};
+
+window.loadRecentWorkoutLogs = async function () {
+  const user = window.auth.currentUser;
+  if (!user) return {};
+  try {
+    const snap = await window.db
+      .collection('users').doc(user.uid)
+      .collection('workoutLogs')
+      .orderBy('timestamp', 'desc')
+      .limit(60)
+      .get();
+    const map = {};
+    snap.docs.forEach(doc => {
+      const d = doc.data();
+      if (!map[d.exerciseId]) map[d.exerciseId] = d; // keep most recent only
+    });
+    return map;
+  } catch (e) {
+    console.error('loadRecentWorkoutLogs:', e);
+    return {};
+  }
+};
+
 // ── RECIPE HELPERS ───────────────────────────────────────
 window.saveRecipeToCloud = async function (recipeData) {
   const user = window.auth.currentUser;
