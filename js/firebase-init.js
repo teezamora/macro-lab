@@ -95,13 +95,25 @@ window.loadRecipeById = async function (id) {
 };
 
 // ── GOOGLE SIGN-IN ───────────────────────────────────────────
+// signInWithPopup is required on GitHub Pages — the redirect flow breaks because
+// Firebase's auth handler (firebaseapp.com) cannot write session data back across
+// the origin boundary to github.io in browsers that block third-party storage.
 window.signInWithGoogle = function () {
   const provider = new firebase.auth.GoogleAuthProvider();
-  window.auth.signInWithRedirect(provider).catch(console.error);
+  window.auth.signInWithPopup(provider).catch(err => {
+    // popup blocked (some mobile browsers) — fall back to redirect
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-cancelled-by-user') {
+      window.auth.signInWithRedirect(provider).catch(console.error);
+    } else {
+      console.error('Google sign-in error:', err);
+    }
+  });
 };
 
-// Handle the redirect result when the page loads back after Google sign-in
-window.auth.getRedirectResult().catch(console.error);
+// Handle any pending redirect result (fallback path for mobile popup-blocked cases)
+window.auth.getRedirectResult().then(result => {
+  if (result && result.user) console.log('Signed in via redirect:', result.user.displayName);
+}).catch(console.error);
 
 // ── AUTH NAV RENDERER ────────────────────────────────────────
 // Fills the #auth-nav element present on every page.

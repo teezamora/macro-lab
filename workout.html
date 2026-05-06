@@ -410,16 +410,10 @@
     /* ── MOBILE TWEAKS ───────────────────────────────────────── */
     @media (max-width: 640px) {
       .day-tabs-wrap { top: 54px; }
-      /* Lift session bar above bottom nav */
-      #session-bar { bottom: calc(62px + env(safe-area-inset-bottom, 0px)); }
-      /* Extra bottom clearance: bottom nav + session bar height */
-      .workout-wrap { padding-bottom: 160px; }
-      /* Bigger session bar buttons for gym use */
+      .workout-wrap { padding-bottom: 80px; }
       .sbtn { padding: 11px 18px; font-size: 11px; }
-      #session-time { font-size: 26px; min-width: 72px; }
-      /* Bigger set-completion button — easier with sweaty fingers */
+      #session-time { font-size: 30px; }
       .set-complete-btn { padding: 14px 0; font-size: 11px; letter-spacing: 1px; }
-      /* Bigger set dots for easier reading */
       .set-dot { width: 12px; height: 12px; }
     }
     @media (max-width: 480px) {
@@ -429,37 +423,41 @@
     }
 
     /* ── SESSION TIMER BAR ───────────────────────────────────── */
-    #session-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 200;
-      background: rgba(10,11,12,0.97);
-      backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      padding: 10px clamp(16px,4vw,64px);
+    .session-timer-card {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 clamp(24px,4vw,64px) 16px;
+    }
+    .session-timer-inner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
+      transition: border-color 0.2s;
+    }
+    .session-timer-inner.running { border-color: rgba(232,255,71,0.28); }
+    .stc-left { flex: 1; min-width: 0; }
+    .stc-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
     }
     #session-time {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 30px;
-      letter-spacing: 2px;
+      font-size: 38px;
+      letter-spacing: 3px;
       line-height: 1;
       color: var(--muted);
-      min-width: 80px;
       transition: color 0.2s;
     }
-    #session-bar.running #session-time { color: var(--accent); }
-    .session-bar-label {
-      font-family: 'DM Mono', monospace;
-      font-size: 8px;
-      letter-spacing: 2px;
-      color: var(--muted2);
-      text-transform: uppercase;
-      flex: 1;
-    }
-    .session-bar-btns { display: flex; gap: 6px; }
+    .session-timer-inner.running #session-time { color: var(--accent); }
+    .session-bar-btns { display: flex; gap: 6px; flex-shrink: 0; }
     .sbtn {
       background: var(--surface2);
       border: 1px solid var(--border);
@@ -572,6 +570,32 @@
       background: transparent;
     }
 
+    /* ── WEIGHT INPUT ──────────────────────────────────────────── */
+    .weight-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border2);
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 15px;
+      padding: 2px 0;
+      width: 100%;
+      outline: none;
+      -moz-appearance: textfield;
+      caret-color: var(--accent);
+    }
+    .weight-input::-webkit-outer-spin-button,
+    .weight-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .weight-input:focus { border-bottom-color: var(--accent); }
+    .weight-input::placeholder { color: var(--muted2); }
+    .weight-suggest {
+      font-size: 9px;
+      color: var(--muted2);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.5px;
+      margin-top: 3px;
+    }
+
   </style>
 </head>
 <body>
@@ -599,6 +623,21 @@
     <p class="workout-page-sub">Cut-phase training to maintain muscle, accelerate fat loss, and build stage-ready physique detail.</p>
   </div>
 
+  <!-- ── SESSION TIMER CARD ──────────────────────────────── -->
+  <div class="session-timer-card fade-up">
+    <div class="session-timer-inner" id="session-timer-inner">
+      <div class="stc-left">
+        <div class="stc-label">// Session Timer</div>
+        <div id="session-time">00:00</div>
+      </div>
+      <div class="session-bar-btns">
+        <button id="session-start-btn" class="sbtn primary">Start Session</button>
+        <button id="session-pause-btn" class="sbtn" style="display:none">Pause</button>
+        <button id="session-reset-btn" class="sbtn" style="display:none">Reset</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── DAY TABS ─────────────────────────────────────────── -->
   <div class="day-tabs-wrap">
     <div class="day-tabs" id="day-tabs"></div>
@@ -606,17 +645,6 @@
 
   <!-- ── DAY PANELS ───────────────────────────────────────── -->
   <div class="workout-wrap" id="day-panels"></div>
-
-  <!-- ── SESSION TIMER BAR ────────────────────────────────── -->
-  <div id="session-bar">
-    <div id="session-time">00:00</div>
-    <div class="session-bar-label">Session Timer</div>
-    <div class="session-bar-btns">
-      <button id="session-start-btn" class="sbtn primary">Start Session</button>
-      <button id="session-pause-btn" class="sbtn" style="display:none">Pause</button>
-      <button id="session-reset-btn" class="sbtn" style="display:none">Reset</button>
-    </div>
-  </div>
 
   <!-- ── SCRIPTS ──────────────────────────────────────────── -->
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -747,8 +775,11 @@
             <div class="ex-detail-body">
               <div class="ex-detail-stats">
                 <div class="ex-stat accent-stat">
-                  <div class="ex-stat-label">Weight</div>
-                  <div class="ex-stat-val">${escHtml(ex.weight)}</div>
+                  <div class="ex-stat-label">Weight Logged</div>
+                  <input type="number" inputmode="decimal" class="weight-input" id="wi-${safeId}"
+                    placeholder="—" step="2.5" min="0"
+                    data-suggest="${escHtml(ex.weight)}" autocomplete="off">
+                  <div class="weight-suggest">Plan: ${escHtml(ex.weight)}</div>
                 </div>
                 <div class="ex-stat">
                   <div class="ex-stat-label">Rest</div>
@@ -810,6 +841,20 @@
           panel.querySelectorAll('.ex-card').forEach(c => c.classList.remove('open'));
           if (!wasOpen) card.classList.add('open');
         });
+
+        // Weight input: restore saved value and persist on change
+        const wInput = card.querySelector('.weight-input');
+        if (wInput) {
+          const saved = localStorage.getItem(`latt_weight_${safeId}`);
+          if (saved) wInput.value = saved;
+          wInput.addEventListener('input', () => {
+            if (wInput.value) {
+              localStorage.setItem(`latt_weight_${safeId}`, wInput.value);
+            } else {
+              localStorage.removeItem(`latt_weight_${safeId}`);
+            }
+          });
+        }
       });
     }
 
@@ -864,7 +909,23 @@
     const setStates = {};
 
     function initSetState(id, total) {
-      if (!setStates[id]) setStates[id] = { done: 0, total, timer: null };
+      const saved = Math.min(parseInt(localStorage.getItem(`latt_set_${id}`) || '0'), total);
+      if (!setStates[id]) setStates[id] = { done: saved, total, timer: null };
+      const st = setStates[id];
+      for (let i = 0; i < st.done; i++) {
+        const dot = document.getElementById(`dot-${id}-${i}`);
+        if (dot) dot.classList.add('done');
+      }
+      const btn = document.getElementById(`scb-${id}`);
+      if (btn) {
+        if (st.done >= st.total) {
+          btn.textContent = 'All Sets Done';
+          btn.disabled = true;
+          btn.classList.add('all-done');
+        } else if (st.done > 0) {
+          btn.textContent = `Complete Set ${st.done + 1}`;
+        }
+      }
     }
 
     function completeSet(id) {
@@ -873,6 +934,7 @@
       const dot = document.getElementById(`dot-${id}-${st.done}`);
       if (dot) dot.classList.add('done');
       st.done++;
+      localStorage.setItem(`latt_set_${id}`, String(st.done));
       const btn  = document.getElementById(`scb-${id}`);
       const secs = parseInt(btn.dataset.secs) || 90;
       if (st.done >= st.total) {
@@ -944,6 +1006,10 @@
     auth.onAuthStateChanged(user => renderAuthNav(user));
 
     /* ── SESSION TIMER ──────────────────────────────────────── */
+    const SK_ELAPSED = 'latt_sess_elapsed';
+    const SK_START   = 'latt_sess_start';
+    const SK_RUNNING = 'latt_sess_running';
+
     let sessionInterval = null;
     let sessionStart    = null;
     let sessionElapsed  = 0;
@@ -963,44 +1029,98 @@
         fmtTime(sessionElapsed + (Date.now() - sessionStart));
     }
 
+    function saveSessionState() {
+      localStorage.setItem(SK_ELAPSED, String(sessionElapsed));
+      localStorage.setItem(SK_START,   String(sessionStart || 0));
+      localStorage.setItem(SK_RUNNING, String(sessionRunning));
+    }
+
+    function setTimerUI(running) {
+      document.getElementById('session-timer-inner').classList.toggle('running', running);
+      document.getElementById('session-start-btn').style.display = running ? 'none' : '';
+      document.getElementById('session-pause-btn').style.display = running ? '' : 'none';
+      document.getElementById('session-reset-btn').style.display = running ? '' : 'none';
+    }
+
     document.getElementById('session-start-btn').addEventListener('click', () => {
       sessionStart   = Date.now();
       sessionRunning = true;
       sessionInterval = setInterval(tickSession, 500);
-      document.getElementById('session-bar').classList.add('running');
-      document.getElementById('session-start-btn').style.display  = 'none';
-      document.getElementById('session-pause-btn').style.display  = '';
-      document.getElementById('session-reset-btn').style.display  = '';
+      setTimerUI(true);
+      saveSessionState();
     });
 
     document.getElementById('session-pause-btn').addEventListener('click', function () {
       if (sessionRunning) {
         sessionElapsed += Date.now() - sessionStart;
         clearInterval(sessionInterval);
-        sessionRunning    = false;
-        this.textContent  = 'Resume';
+        sessionRunning   = false;
+        this.textContent = 'Resume';
         this.classList.add('primary');
+        document.getElementById('session-timer-inner').classList.remove('running');
       } else {
         sessionStart    = Date.now();
         sessionRunning  = true;
         sessionInterval = setInterval(tickSession, 500);
         this.textContent = 'Pause';
         this.classList.remove('primary');
+        document.getElementById('session-timer-inner').classList.add('running');
       }
+      saveSessionState();
     });
 
     document.getElementById('session-reset-btn').addEventListener('click', () => {
       clearInterval(sessionInterval);
       sessionInterval = null; sessionStart = null;
       sessionElapsed  = 0;    sessionRunning = false;
-      document.getElementById('session-time').textContent       = '00:00';
-      document.getElementById('session-bar').classList.remove('running');
-      document.getElementById('session-start-btn').style.display = '';
-      document.getElementById('session-pause-btn').style.display = 'none';
-      document.getElementById('session-reset-btn').style.display = 'none';
+      document.getElementById('session-time').textContent = '00:00';
+      setTimerUI(false);
       const pb = document.getElementById('session-pause-btn');
       pb.textContent = 'Pause'; pb.classList.remove('primary');
+      // Clear persisted session + set states
+      [SK_ELAPSED, SK_START, SK_RUNNING].forEach(k => localStorage.removeItem(k));
+      Object.keys(localStorage).filter(k => k.startsWith('latt_set_'))
+        .forEach(k => localStorage.removeItem(k));
+      // Reset set UI
+      Object.keys(setStates).forEach(id => {
+        const st = setStates[id];
+        if (st.timer) { clearInterval(st.timer); st.timer = null; }
+        st.done = 0;
+        for (let i = 0; i < st.total; i++) {
+          const dot = document.getElementById(`dot-${id}-${i}`);
+          if (dot) dot.classList.remove('done');
+        }
+        const btn = document.getElementById(`scb-${id}`);
+        if (btn) { btn.textContent = 'Complete Set 1'; btn.disabled = false; btn.classList.remove('all-done'); }
+        const row = document.getElementById(`srr-${id}`);
+        if (row) row.classList.remove('active');
+      });
     });
+
+    // Restore session state across refreshes
+    (function restoreSession() {
+      const savedElapsed = parseInt(localStorage.getItem(SK_ELAPSED) || '0');
+      const savedStart   = parseInt(localStorage.getItem(SK_START)   || '0');
+      const wasRunning   = localStorage.getItem(SK_RUNNING) === 'true';
+      if (savedElapsed <= 0 && !wasRunning) return;
+      document.getElementById('session-pause-btn').style.display = '';
+      document.getElementById('session-reset-btn').style.display = '';
+      document.getElementById('session-start-btn').style.display = 'none';
+      if (wasRunning && savedStart > 0) {
+        sessionElapsed  = savedElapsed + (Date.now() - savedStart);
+        sessionStart    = Date.now();
+        sessionRunning  = true;
+        sessionInterval = setInterval(tickSession, 500);
+        document.getElementById('session-timer-inner').classList.add('running');
+        tickSession();
+      } else {
+        sessionElapsed = savedElapsed;
+        document.getElementById('session-time').textContent = fmtTime(savedElapsed);
+        const pb = document.getElementById('session-pause-btn');
+        pb.textContent = 'Resume';
+        pb.classList.add('primary');
+      }
+    })();
 
   </script>
 
