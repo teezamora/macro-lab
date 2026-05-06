@@ -759,6 +759,56 @@
     .add-ex-input:focus { border-color: var(--accent); }
     .add-ex-form-btns { display: flex; gap: 8px; justify-content: flex-end; }
 
+    /* ── SET LOG ─────────────────────────────────────────────── */
+    .set-log { margin: 4px 0 8px; }
+    .set-log-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid var(--border);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+    }
+    .set-log-row:last-child { border-bottom: none; }
+    .set-log-num   { color: var(--muted2); min-width: 36px; font-size: 9px; letter-spacing: 0.5px; }
+    .set-log-weight{ color: var(--accent); flex: 1; }
+    .set-log-reps  { color: var(--text); }
+    .set-log-check { color: var(--accent); font-size: 10px; }
+
+    /* ── REPS INPUT ───────────────────────────────────────────── */
+    .set-reps-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 6px 0 8px;
+    }
+    .set-reps-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      flex: 1;
+    }
+    .reps-input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 17px;
+      padding: 6px 0;
+      width: 64px;
+      text-align: center;
+      outline: none;
+      -moz-appearance: textfield;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .reps-input::-webkit-outer-spin-button,
+    .reps-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .reps-input:focus { border-color: var(--accent); }
+
   </style>
 </head>
 <body>
@@ -856,13 +906,13 @@
 
         if (day.isRecovery) {
           panel.innerHTML = buildRecoveryPanel(day);
+          container.appendChild(panel);
         } else {
           panel.innerHTML = buildTrainingPanel(day);
           injectCustomExercises(panel, day);
+          container.appendChild(panel);   // append first so getElementById works in listeners
           attachCardListeners(panel, day);
         }
-
-        container.appendChild(panel);
       });
     }
 
@@ -956,6 +1006,7 @@
       const restSecs    = parseInt((ex.rest ? ex.rest.match(/\d+/) || ['90'] : ['90'])[0]);
       const dotsHtml    = Array.from({length: ex.sets}, (_, i) =>
         `<span class="set-dot" id="dot-${safeId}-${i}"></span>`).join('');
+      const defaultReps = String(ex.reps || '').match(/\d+/)?.[0] || '';
       const notesHtml = ex.notes ? `<div class="ex-notes">${escHtml(ex.notes)}</div>` : '';
       const cueHtml   = ex.cue   ? `<div class="ex-cue-box"><div class="ex-cue-label">Form Cue</div><div class="ex-cue-text">${escHtml(ex.cue)}</div></div>` : '';
       return `
@@ -1003,12 +1054,18 @@
                   <div class="set-dots" id="dots-${safeId}">${dotsHtml}</div>
                   <button type="button" class="add-set-btn" id="asb-${safeId}">+ Set</button>
                 </div>
+                <div class="set-log" id="sl-${safeId}"></div>
                 <div class="set-rest-row" id="srr-${safeId}">
                   <span class="set-rest-cd" id="src-${safeId}">0:00</span>
                   <div class="rest-prog-track">
                     <div class="rest-prog-fill" id="srf-${safeId}" style="width:100%"></div>
                   </div>
                   <button class="set-skip-btn" id="ssk-${safeId}">Skip</button>
+                </div>
+                <div class="set-reps-row">
+                  <span class="set-reps-label">Reps done</span>
+                  <input type="number" inputmode="numeric" class="reps-input" id="ri-${safeId}"
+                    value="${defaultReps}" placeholder="${defaultReps || '—'}" min="0" max="99" autocomplete="off">
                 </div>
                 <button class="set-complete-btn" id="scb-${safeId}"
                   data-secs="${restSecs}" data-sets="${ex.sets}">
@@ -1256,13 +1313,20 @@
     const setStates = {};
 
     function initSetState(id, total, exName, dayId) {
-      const saved = Math.min(parseInt(localStorage.getItem(`latt_set_${id}`) || '0'), total);
-      if (!setStates[id]) setStates[id] = { done: saved, total, timer: null, name: exName || id, dayId: dayId || '' };
+      const savedDone = Math.min(parseInt(localStorage.getItem(`latt_set_${id}`) || '0'), total);
+      const savedLog  = JSON.parse(localStorage.getItem(`latt_setlog_${id}`) || '[]');
+      if (!setStates[id]) {
+        setStates[id] = { done: savedDone, total, timer: null, name: exName || id, dayId: dayId || '', log: savedLog };
+      }
       const st = setStates[id];
+      // Restore dots
       for (let i = 0; i < st.done; i++) {
         const dot = document.getElementById(`dot-${id}-${i}`);
         if (dot) dot.classList.add('done');
       }
+      // Restore per-set log display
+      st.log.forEach(entry => appendSetLogRow(id, entry.set, entry.weight, entry.reps));
+      // Restore button state
       const btn = document.getElementById(`scb-${id}`);
       if (btn) {
         if (st.done >= st.total) {
@@ -1275,19 +1339,47 @@
       }
     }
 
+    function appendSetLogRow(id, setNum, weight, reps) {
+      const logEl = document.getElementById(`sl-${id}`);
+      if (!logEl) return;
+      const row = document.createElement('div');
+      row.className = 'set-log-row';
+      row.innerHTML =
+        `<span class="set-log-num">Set ${setNum}</span>` +
+        `<span class="set-log-weight">${weight > 0 ? weight + ' lbs' : '—'}</span>` +
+        `<span class="set-log-reps">${reps > 0 ? '× ' + reps : '—'}</span>` +
+        `<span class="set-log-check">✓</span>`;
+      logEl.appendChild(row);
+    }
+
     function completeSet(id) {
       const st = setStates[id];
       if (!st || st.timer) return;
+
+      // Capture weight + reps for this set
+      const weight  = parseFloat(document.getElementById(`wi-${id}`)?.value) || 0;
+      const reps    = parseInt(document.getElementById(`ri-${id}`)?.value)   || 0;
+      const setNum  = st.done + 1;
+
+      // Mark dot
       const dot = document.getElementById(`dot-${id}-${st.done}`);
       if (dot) dot.classList.add('done');
       st.done++;
-      localStorage.setItem(`latt_set_${id}`, String(st.done));
-      // Save weight to Firestore if signed in
-      const wInput = document.getElementById(`wi-${id}`);
-      const weight = wInput ? parseFloat(wInput.value) : 0;
-      if (weight > 0 && window.saveWorkoutLog) {
-        window.saveWorkoutLog(id, st.name, weight, st.done, st.dayId).catch(console.error);
+
+      // Save per-set log
+      if (!st.log) st.log = [];
+      st.log.push({ set: setNum, weight, reps });
+      localStorage.setItem(`latt_set_${id}`,    String(st.done));
+      localStorage.setItem(`latt_setlog_${id}`, JSON.stringify(st.log));
+
+      // Display the completed set row
+      appendSetLogRow(id, setNum, weight, reps);
+
+      // Save to Firestore
+      if (window.saveWorkoutLog) {
+        window.saveWorkoutLog(id, st.name, weight, st.done, st.dayId, st.log).catch(console.error);
       }
+
       const btn  = document.getElementById(`scb-${id}`);
       const secs = parseInt(btn.dataset.secs) || 90;
       if (st.done >= st.total) {
@@ -1467,21 +1559,24 @@
       pb.textContent = 'Pause'; pb.classList.remove('primary');
       // Clear persisted session + set states
       [SK_ELAPSED, SK_START, SK_RUNNING].forEach(k => localStorage.removeItem(k));
-      Object.keys(localStorage).filter(k => k.startsWith('latt_set_'))
+      Object.keys(localStorage).filter(k => k.startsWith('latt_set_') || k.startsWith('latt_setlog_'))
         .forEach(k => localStorage.removeItem(k));
       // Reset set UI
       Object.keys(setStates).forEach(id => {
         const st = setStates[id];
         if (st.timer) { clearInterval(st.timer); st.timer = null; }
         st.done = 0;
+        st.log  = [];
         for (let i = 0; i < st.total; i++) {
           const dot = document.getElementById(`dot-${id}-${i}`);
           if (dot) dot.classList.remove('done');
         }
-        const btn = document.getElementById(`scb-${id}`);
+        const btn    = document.getElementById(`scb-${id}`);
         if (btn) { btn.textContent = 'Complete Set 1'; btn.disabled = false; btn.classList.remove('all-done'); }
-        const row = document.getElementById(`srr-${id}`);
+        const row    = document.getElementById(`srr-${id}`);
         if (row) row.classList.remove('active');
+        const logEl  = document.getElementById(`sl-${id}`);
+        if (logEl) logEl.innerHTML = '';
       });
     });
 

@@ -57,9 +57,9 @@ window.loadProfileFromCloud = async function () {
 };
 
 // ── WORKOUT LOG HELPERS ──────────────────────────────────────
-window.saveWorkoutLog = async function (exerciseId, exerciseName, weight, setsCompleted, dayId) {
+window.saveWorkoutLog = async function (exerciseId, exerciseName, weight, setsCompleted, dayId, setLog) {
   const user = window.auth.currentUser;
-  if (!user || !weight || weight <= 0) return;
+  if (!user) return;
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   const docId  = `${exerciseId}_${today}`;
   await window.db
@@ -68,8 +68,9 @@ window.saveWorkoutLog = async function (exerciseId, exerciseName, weight, setsCo
     .set({
       exerciseId,
       exerciseName,
-      weight:        parseFloat(weight),
+      weight:        parseFloat(weight) || 0,
       setsCompleted: setsCompleted || 0,
+      setLog:        setLog || [],
       dayId:         dayId || '',
       date:          today,
       timestamp:     firebase.firestore.FieldValue.serverTimestamp(),
