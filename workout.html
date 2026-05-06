@@ -1076,12 +1076,12 @@
       const addSetBtn = card.querySelector('.add-set-btn');
       if (addSetBtn) addSetBtn.addEventListener('click', e => { e.stopPropagation(); addSet(safeId); });
 
-      // Swap
-      const swapBtn    = document.getElementById(`swb-${safeId}`);
-      const swapForm   = document.getElementById(`swf-${safeId}`);
-      const swapInput  = document.getElementById(`swi-${safeId}`);
-      const swSaveBtn  = document.getElementById(`swsave-${safeId}`);
-      const swCancelBtn= document.getElementById(`swcancel-${safeId}`);
+      // Swap — use card.querySelector so this works before panel is in the document
+      const swapBtn     = card.querySelector('.swap-btn');
+      const swapForm    = card.querySelector('.swap-form');
+      const swapInput   = card.querySelector('.swap-input');
+      const swSaveBtn   = card.querySelector('.swap-form-btns .primary');
+      const swCancelBtn = card.querySelector('.swap-form-btns .sbtn:not(.primary)');
       if (swapBtn && swapForm) {
         swapBtn.addEventListener('click', () => {
           swapForm.classList.toggle('open');
