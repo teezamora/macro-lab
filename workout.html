@@ -623,6 +623,142 @@
       min-height: 13px;
     }
 
+    /* ── ADD SET ─────────────────────────────────────────────── */
+    .add-set-btn {
+      background: none;
+      border: none;
+      color: var(--muted2);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 2px 0 2px 8px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-set-btn:hover, .add-set-btn:active { color: var(--accent); }
+
+    /* ── SWAP EXERCISE ───────────────────────────────────────── */
+    .swap-btn {
+      display: inline-block;
+      background: none;
+      border: none;
+      color: var(--muted2);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      padding: 10px 0 4px;
+      transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .swap-btn:hover, .swap-btn:active { color: var(--text); }
+    .swap-form {
+      display: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .swap-form.open { display: block; }
+    .swap-form-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .swap-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 14px;
+      padding: 8px 10px;
+      outline: none;
+      margin-bottom: 8px;
+      box-sizing: border-box;
+    }
+    .swap-input:focus { border-color: var(--accent); }
+    .swap-form-btns { display: flex; gap: 6px; }
+
+    /* ── ADD EXERCISE ────────────────────────────────────────── */
+    .add-exercise-wrap { padding: 4px 16px 28px; }
+    .add-exercise-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 1px dashed var(--border2);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .add-exercise-btn:hover, .add-exercise-btn:active { border-color: var(--accent); color: var(--accent); }
+    .add-ex-form {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 10px;
+    }
+    .add-ex-form.open { display: block; }
+    .add-ex-form-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 2.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .add-ex-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .add-ex-field-full { grid-column: 1 / -1; }
+    .add-ex-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 1px;
+      color: var(--muted);
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .add-ex-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 9px 10px;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .add-ex-input:focus { border-color: var(--accent); }
+    .add-ex-form-btns { display: flex; gap: 8px; justify-content: flex-end; }
+
   </style>
 </head>
 <body>
@@ -722,6 +858,7 @@
           panel.innerHTML = buildRecoveryPanel(day);
         } else {
           panel.innerHTML = buildTrainingPanel(day);
+          injectCustomExercises(panel, day);
           attachCardListeners(panel, day);
         }
 
@@ -777,24 +914,59 @@
           </div>
         </div>
 
-        ${sectionsHTML}`;
+        ${sectionsHTML}
+        <div class="add-exercise-wrap">
+          <button type="button" class="add-exercise-btn" id="aeb-${day.id}">+ Add Exercise</button>
+          <div class="add-ex-form" id="aef-${day.id}">
+            <div class="add-ex-form-title">// Add Exercise</div>
+            <div class="add-ex-fields">
+              <div class="add-ex-field-full">
+                <label class="add-ex-label">Exercise Name</label>
+                <input type="text" class="add-ex-input" id="aef-name-${day.id}" placeholder="e.g. Cable Curl" autocomplete="off">
+              </div>
+              <div>
+                <label class="add-ex-label">Sets</label>
+                <input type="number" inputmode="numeric" class="add-ex-input" id="aef-sets-${day.id}" placeholder="3" min="1" max="10">
+              </div>
+              <div>
+                <label class="add-ex-label">Reps</label>
+                <input type="text" class="add-ex-input" id="aef-reps-${day.id}" placeholder="10–12">
+              </div>
+              <div>
+                <label class="add-ex-label">Weight (lbs)</label>
+                <input type="number" inputmode="decimal" class="add-ex-input" id="aef-weight-${day.id}" placeholder="—">
+              </div>
+              <div>
+                <label class="add-ex-label">Rest</label>
+                <input type="text" class="add-ex-input" id="aef-rest-${day.id}" placeholder="90 sec">
+              </div>
+            </div>
+            <div class="add-ex-form-btns">
+              <button type="button" class="sbtn" id="aef-cancel-${day.id}">Cancel</button>
+              <button type="button" class="sbtn primary" id="aef-save-${day.id}">Add Exercise</button>
+            </div>
+          </div>
+        </div>`;
     }
 
     /* ── EXERCISE CARD HTML ─────────────────────────────────── */
     function buildExerciseCard(ex, num) {
-      const safeId   = ex.name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-      const restSecs = parseInt((ex.rest.match(/\d+/) || ['90'])[0]);
-      const dotsHtml = Array.from({length: ex.sets}, (_, i) =>
+      const safeId      = ex.name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      const displayName = localStorage.getItem(`latt_swap_${safeId}`) || ex.name;
+      const restSecs    = parseInt((ex.rest ? ex.rest.match(/\d+/) || ['90'] : ['90'])[0]);
+      const dotsHtml    = Array.from({length: ex.sets}, (_, i) =>
         `<span class="set-dot" id="dot-${safeId}-${i}"></span>`).join('');
+      const notesHtml = ex.notes ? `<div class="ex-notes">${escHtml(ex.notes)}</div>` : '';
+      const cueHtml   = ex.cue   ? `<div class="ex-cue-box"><div class="ex-cue-label">Form Cue</div><div class="ex-cue-text">${escHtml(ex.cue)}</div></div>` : '';
       return `
         <div class="ex-card" data-exercise="${escHtml(ex.name)}" id="ex-${safeId}">
           <div class="ex-card-header">
             <span class="ex-card-num">${String(num).padStart(2,'0')}</span>
-            <span class="ex-card-name">${escHtml(ex.name)}</span>
+            <span class="ex-card-name">${escHtml(displayName)}</span>
             <div class="ex-pills">
-              <span class="ex-pill ex-pill-sets">${ex.sets}×</span>
+              <span class="ex-pill ex-pill-sets" id="pill-sets-${safeId}">${ex.sets}×</span>
               <span class="ex-pill ex-pill-reps">${escHtml(ex.reps)}</span>
-              <span class="ex-pill ex-pill-weight">${escHtml(ex.weight)}</span>
+              <span class="ex-pill ex-pill-weight">${escHtml(ex.weight || '—')}</span>
             </div>
             <span class="ex-chevron">▾</span>
           </div>
@@ -807,28 +979,29 @@
                     <button type="button" class="weight-step-btn" data-delta="-5">−5</button>
                     <input type="number" inputmode="decimal" class="weight-input" id="wi-${safeId}"
                       placeholder="lbs" step="2.5" min="0"
-                      data-suggest="${escHtml(ex.weight)}" autocomplete="off">
+                      data-suggest="${escHtml(ex.weight || '')}" autocomplete="off">
                     <button type="button" class="weight-step-btn" data-delta="5">+5</button>
                   </div>
-                  <div class="weight-suggest" id="ws-${safeId}">Plan: ${escHtml(ex.weight)}</div>
+                  <div class="weight-suggest" id="ws-${safeId}">Plan: ${escHtml(ex.weight || '—')}</div>
                 </div>
                 <div class="ex-stat">
                   <div class="ex-stat-label">Rest</div>
-                  <div class="ex-stat-val">${escHtml(ex.rest)}</div>
+                  <div class="ex-stat-val">${escHtml(ex.rest || '90 sec')}</div>
                 </div>
                 <div class="ex-stat">
                   <div class="ex-stat-label">Sets × Reps</div>
-                  <div class="ex-stat-val">${ex.sets} × ${escHtml(ex.reps)}</div>
+                  <div class="ex-stat-val" id="setreps-${safeId}">${ex.sets} × ${escHtml(ex.reps)}</div>
                 </div>
                 <div class="ex-stat">
                   <div class="ex-stat-label">RIR Target</div>
-                  <div class="ex-stat-val">${escHtml(ex.rir)}</div>
+                  <div class="ex-stat-val">${escHtml(ex.rir || '1–2')}</div>
                 </div>
               </div>
               <div class="set-tracker">
                 <div class="set-tracker-top">
                   <span class="set-tracker-lbl">Sets</span>
-                  <div class="set-dots">${dotsHtml}</div>
+                  <div class="set-dots" id="dots-${safeId}">${dotsHtml}</div>
+                  <button type="button" class="add-set-btn" id="asb-${safeId}">+ Set</button>
                 </div>
                 <div class="set-rest-row" id="srr-${safeId}">
                   <span class="set-rest-cd" id="src-${safeId}">0:00</span>
@@ -842,62 +1015,194 @@
                   Complete Set 1
                 </button>
               </div>
-              <div class="ex-notes">${escHtml(ex.notes)}</div>
-              <div class="ex-cue-box">
-                <div class="ex-cue-label">Form Cue</div>
-                <div class="ex-cue-text">${escHtml(ex.cue)}</div>
+              <button type="button" class="swap-btn" id="swb-${safeId}">↔ Swap Exercise</button>
+              <div class="swap-form" id="swf-${safeId}">
+                <div class="swap-form-label">Replace with</div>
+                <input type="text" class="swap-input" id="swi-${safeId}"
+                  value="${escHtml(displayName)}" autocomplete="off">
+                <div class="swap-form-btns">
+                  <button type="button" class="sbtn primary" id="swsave-${safeId}">Save</button>
+                  <button type="button" class="sbtn" id="swcancel-${safeId}">Cancel</button>
+                </div>
               </div>
+              ${notesHtml}
+              ${cueHtml}
             </div>
           </div>
         </div>`;
     }
 
-    /* ── CARD TOGGLE ─────────────────────────────────────────── */
-    function attachCardListeners(panel, day) {
-      panel.querySelectorAll('.ex-card').forEach(card => {
-        const header = card.querySelector('.ex-card-header');
-        const exName = card.dataset.exercise;
-        const safeId = exName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-        const cmpBtn = card.querySelector('.set-complete-btn');
-        const skipBtn = card.querySelector('.set-skip-btn');
+    /* ── CARD LISTENERS ─────────────────────────────────────── */
+    function attachSingleCardListeners(card, panel, day) {
+      const header  = card.querySelector('.ex-card-header');
+      const exName  = card.dataset.exercise;
+      const safeId  = exName.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      const cmpBtn  = card.querySelector('.set-complete-btn');
+      const skipBtn = card.querySelector('.set-skip-btn');
 
-        if (cmpBtn) {
-          initSetState(safeId, parseInt(cmpBtn.dataset.sets) || 1, exName, day.id);
-          cmpBtn.addEventListener('click', () => completeSet(safeId));
-        }
-        if (skipBtn) skipBtn.addEventListener('click', () => skipSetRest(safeId));
+      if (cmpBtn) {
+        initSetState(safeId, parseInt(cmpBtn.dataset.sets) || 1, exName, day.id);
+        cmpBtn.addEventListener('click', () => completeSet(safeId));
+      }
+      if (skipBtn) skipBtn.addEventListener('click', () => skipSetRest(safeId));
 
-        header.addEventListener('click', () => {
-          const wasOpen = card.classList.contains('open');
-          panel.querySelectorAll('.ex-card').forEach(c => c.classList.remove('open'));
-          if (!wasOpen) card.classList.add('open');
-        });
-
-        // Weight stepper: restore saved value, wire +/- buttons, persist on change
-        const wInput = card.querySelector('.weight-input');
-        if (wInput) {
-          const saved = localStorage.getItem(`latt_weight_${safeId}`);
-          if (saved) wInput.value = saved;
-
-          wInput.addEventListener('input', () => {
-            if (wInput.value) {
-              localStorage.setItem(`latt_weight_${safeId}`, wInput.value);
-            } else {
-              localStorage.removeItem(`latt_weight_${safeId}`);
-            }
-          });
-
-          card.querySelectorAll('.weight-step-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const delta = parseFloat(btn.dataset.delta);
-              const cur   = parseFloat(wInput.value) || 0;
-              const next  = Math.max(0, cur + delta);
-              wInput.value = next % 1 === 0 ? next : next.toFixed(1);
-              wInput.dispatchEvent(new Event('input'));
-            });
-          });
-        }
+      header?.addEventListener('click', () => {
+        const wasOpen = card.classList.contains('open');
+        panel.querySelectorAll('.ex-card').forEach(c => c.classList.remove('open'));
+        if (!wasOpen) card.classList.add('open');
       });
+
+      // Weight stepper
+      const wInput = card.querySelector('.weight-input');
+      if (wInput) {
+        const saved = localStorage.getItem(`latt_weight_${safeId}`);
+        if (saved) wInput.value = saved;
+        wInput.addEventListener('input', () => {
+          if (wInput.value) localStorage.setItem(`latt_weight_${safeId}`, wInput.value);
+          else localStorage.removeItem(`latt_weight_${safeId}`);
+        });
+        card.querySelectorAll('.weight-step-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const delta = parseFloat(btn.dataset.delta);
+            const cur   = parseFloat(wInput.value) || 0;
+            const next  = Math.max(0, cur + delta);
+            wInput.value = next % 1 === 0 ? next : next.toFixed(1);
+            wInput.dispatchEvent(new Event('input'));
+          });
+        });
+      }
+
+      // + Set
+      const addSetBtn = card.querySelector('.add-set-btn');
+      if (addSetBtn) addSetBtn.addEventListener('click', e => { e.stopPropagation(); addSet(safeId); });
+
+      // Swap
+      const swapBtn    = document.getElementById(`swb-${safeId}`);
+      const swapForm   = document.getElementById(`swf-${safeId}`);
+      const swapInput  = document.getElementById(`swi-${safeId}`);
+      const swSaveBtn  = document.getElementById(`swsave-${safeId}`);
+      const swCancelBtn= document.getElementById(`swcancel-${safeId}`);
+      if (swapBtn && swapForm) {
+        swapBtn.addEventListener('click', () => {
+          swapForm.classList.toggle('open');
+          if (swapForm.classList.contains('open')) { swapInput?.focus(); swapInput?.select(); }
+        });
+        swSaveBtn?.addEventListener('click', () => {
+          const newName = swapInput?.value.trim();
+          if (!newName) return;
+          card.querySelector('.ex-card-name').textContent = newName;
+          localStorage.setItem(`latt_swap_${safeId}`, newName);
+          swapForm.classList.remove('open');
+        });
+        swCancelBtn?.addEventListener('click', () => {
+          swapForm.classList.remove('open');
+          if (swapInput) swapInput.value = localStorage.getItem(`latt_swap_${safeId}`) || exName;
+        });
+      }
+    }
+
+    function attachCardListeners(panel, day) {
+      panel.querySelectorAll('.ex-card').forEach(card => attachSingleCardListeners(card, panel, day));
+      setupAddExerciseForm(panel, day);
+    }
+
+    /* ── ADD SET ─────────────────────────────────────────────── */
+    function addSet(safeId) {
+      const st = setStates[safeId];
+      if (!st) return;
+      st.total++;
+      const dotsEl = document.getElementById(`dots-${safeId}`);
+      if (dotsEl) {
+        const dot = document.createElement('span');
+        dot.className = 'set-dot' + (st.total - 1 < st.done ? ' done' : '');
+        dot.id = `dot-${safeId}-${st.total - 1}`;
+        dotsEl.appendChild(dot);
+      }
+      const pill = document.getElementById(`pill-sets-${safeId}`);
+      if (pill) pill.textContent = `${st.total}×`;
+      const setreps = document.getElementById(`setreps-${safeId}`);
+      if (setreps) setreps.textContent = setreps.textContent.replace(/^\d+/, st.total);
+      const btn = document.getElementById(`scb-${safeId}`);
+      if (btn) {
+        btn.dataset.sets = st.total;
+        if (btn.classList.contains('all-done')) {
+          btn.textContent = `Complete Set ${st.total}`;
+          btn.disabled = false;
+          btn.classList.remove('all-done');
+        }
+      }
+    }
+
+    /* ── ADD EXERCISE ────────────────────────────────────────── */
+    function setupAddExerciseForm(panel, day) {
+      const addBtn    = document.getElementById(`aeb-${day.id}`);
+      const form      = document.getElementById(`aef-${day.id}`);
+      const cancelBtn = document.getElementById(`aef-cancel-${day.id}`);
+      const saveBtn   = document.getElementById(`aef-save-${day.id}`);
+      if (!addBtn || !form) return;
+
+      addBtn.addEventListener('click', () => {
+        form.classList.toggle('open');
+        if (form.classList.contains('open')) document.getElementById(`aef-name-${day.id}`)?.focus();
+      });
+      cancelBtn?.addEventListener('click', () => { form.classList.remove('open'); clearAddExForm(day.id); });
+      saveBtn?.addEventListener('click', () => {
+        const name   = document.getElementById(`aef-name-${day.id}`)?.value.trim();
+        if (!name) { document.getElementById(`aef-name-${day.id}`)?.focus(); return; }
+        const sets   = parseInt(document.getElementById(`aef-sets-${day.id}`)?.value)   || 3;
+        const reps   = document.getElementById(`aef-reps-${day.id}`)?.value.trim()   || '10–12';
+        const weight = document.getElementById(`aef-weight-${day.id}`)?.value.trim() || '—';
+        const rest   = document.getElementById(`aef-rest-${day.id}`)?.value.trim()   || '90 sec';
+        const exData = { name, sets, reps, weight, rest, notes: '', cue: '', rir: '1–2' };
+        addCustomExerciseToPanel(panel, day, exData);
+        saveCustomExercise(day.id, exData);
+        form.classList.remove('open');
+        clearAddExForm(day.id);
+      });
+    }
+
+    function clearAddExForm(dayId) {
+      ['name','sets','reps','weight','rest'].forEach(f => {
+        const el = document.getElementById(`aef-${f}-${dayId}`);
+        if (el) el.value = '';
+      });
+    }
+
+    function addCustomExerciseToPanel(panel, day, exData) {
+      let section = panel.querySelector('.custom-ex-section');
+      if (!section) {
+        section = document.createElement('div');
+        section.className = 'ex-section custom-ex-section';
+        section.innerHTML = `<div class="ex-section-header"><span class="ex-section-title">Added</span><span class="ex-section-line"></span></div>`;
+        const wrap = panel.querySelector('.add-exercise-wrap');
+        panel.insertBefore(section, wrap || null);
+      }
+      const num = panel.querySelectorAll('.ex-card').length + 1;
+      section.insertAdjacentHTML('beforeend', buildExerciseCard(exData, num));
+      const safeId  = exData.name.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+      const newCard = document.getElementById(`ex-${safeId}`);
+      if (newCard) attachSingleCardListeners(newCard, panel, day);
+    }
+
+    function saveCustomExercise(dayId, exData) {
+      const key  = `latt_custom_exs_${dayId}`;
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!list.find(e => e.name === exData.name)) {
+        list.push(exData);
+        localStorage.setItem(key, JSON.stringify(list));
+      }
+    }
+
+    function injectCustomExercises(panel, day) {
+      const list = JSON.parse(localStorage.getItem(`latt_custom_exs_${day.id}`) || '[]');
+      if (!list.length) return;
+      let section = document.createElement('div');
+      section.className = 'ex-section custom-ex-section';
+      section.innerHTML = `<div class="ex-section-header"><span class="ex-section-title">Added</span><span class="ex-section-line"></span></div>`;
+      const wrap = panel.querySelector('.add-exercise-wrap');
+      panel.insertBefore(section, wrap || null);
+      let num = panel.querySelectorAll('.ex-card').length;
+      list.forEach(exData => { num++; section.insertAdjacentHTML('beforeend', buildExerciseCard(exData, num)); });
     }
 
     /* ── RECOVERY PANEL ─────────────────────────────────────── */
