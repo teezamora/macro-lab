@@ -775,6 +775,27 @@
     .set-log-weight{ color: var(--accent); flex: 1; }
     .set-log-reps  { color: var(--text); }
     .set-log-check { color: var(--accent); font-size: 10px; }
+    .set-log-val {
+      cursor: pointer;
+      border-bottom: 1px dashed transparent;
+      transition: border-color 0.15s;
+      padding-bottom: 1px;
+    }
+    .set-log-val:hover, .set-log-val:active { border-bottom-color: var(--muted2); }
+    .set-log-edit-input {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 3px;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      padding: 2px 5px;
+      outline: none;
+      -moz-appearance: textfield;
+      min-width: 0;
+    }
+    .set-log-edit-input::-webkit-outer-spin-button,
+    .set-log-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
     /* ── REPS INPUT ───────────────────────────────────────────── */
     .set-reps-row {
@@ -1344,11 +1365,68 @@
       if (!logEl) return;
       const row = document.createElement('div');
       row.className = 'set-log-row';
-      row.innerHTML =
-        `<span class="set-log-num">Set ${setNum}</span>` +
-        `<span class="set-log-weight">${weight > 0 ? weight + ' lbs' : '—'}</span>` +
-        `<span class="set-log-reps">${reps > 0 ? '× ' + reps : '—'}</span>` +
-        `<span class="set-log-check">✓</span>`;
+
+      const weightSpan = document.createElement('span');
+      weightSpan.className = 'set-log-weight set-log-val';
+      weightSpan.dataset.field = 'weight';
+      weightSpan.dataset.val   = weight;
+      weightSpan.textContent   = weight > 0 ? weight + ' lbs' : '—';
+
+      const repsSpan = document.createElement('span');
+      repsSpan.className = 'set-log-reps set-log-val';
+      repsSpan.dataset.field = 'reps';
+      repsSpan.dataset.val   = reps;
+      repsSpan.textContent   = reps > 0 ? '× ' + reps : '—';
+
+      row.innerHTML = `<span class="set-log-num">Set ${setNum}</span>`;
+      row.appendChild(weightSpan);
+      row.appendChild(repsSpan);
+      row.insertAdjacentHTML('beforeend', '<span class="set-log-check">✓</span>');
+
+      // Tap to edit weight or reps inline
+      [weightSpan, repsSpan].forEach(span => {
+        span.addEventListener('click', function () {
+          if (this.querySelector('input')) return;
+          const field  = this.dataset.field;
+          const curVal = parseFloat(this.dataset.val) || 0;
+          const input  = document.createElement('input');
+          input.type      = 'number';
+          input.inputMode = field === 'reps' ? 'numeric' : 'decimal';
+          input.className = 'set-log-edit-input';
+          input.value     = curVal || '';
+          input.min       = '0';
+          input.style.width = field === 'weight' ? '54px' : '40px';
+          this.textContent = '';
+          this.appendChild(input);
+          input.focus();
+          input.select();
+
+          const save = () => {
+            const newVal = parseFloat(input.value) || 0;
+            this.dataset.val   = newVal;
+            this.textContent   = field === 'weight'
+              ? (newVal > 0 ? newVal + ' lbs' : '—')
+              : (newVal > 0 ? '× ' + newVal   : '—');
+            // Update in-memory log and persist
+            const st = setStates[id];
+            if (st?.log) {
+              const entry = st.log.find(e => e.set === setNum);
+              if (entry) {
+                entry[field] = newVal;
+                localStorage.setItem(`latt_setlog_${id}`, JSON.stringify(st.log));
+                if (window.saveWorkoutLog) {
+                  window.saveWorkoutLog(id, st.name, entry.weight, st.done, st.dayId, st.log)
+                    .catch(console.error);
+                }
+              }
+            }
+          };
+
+          input.addEventListener('blur', save);
+          input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+        });
+      });
+
       logEl.appendChild(row);
     }
 
